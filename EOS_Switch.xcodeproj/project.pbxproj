@@ -9,12 +9,17 @@
 /* Begin PBXBuildFile section */
 		BC50CE721DDE3076002173F4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE711DDE3076002173F4 /* main.c */; };
 		BC50CE751DDE3076002173F4 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE741DDE3076002173F4 /* Makefile */; };
+		BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE8C1DDE3F8F002173F4 /* calibration.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BC50CE6E1DDE3076002173F4 /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC50CE711DDE3076002173F4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		BC50CE741DDE3076002173F4 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		BC50CE871DDE311C002173F4 /* pindefinitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pindefinitions.h; sourceTree = "<group>"; };
+		BC50CE881DDE3B13002173F4 /* calibration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calibration.h; sourceTree = "<group>"; };
+		BC50CE8B1DDE3BC6002173F4 /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
+		BC50CE8C1DDE3F8F002173F4 /* calibration.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = calibration.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -37,7 +42,11 @@
 		BC50CE701DDE3076002173F4 /* EOS_Switch */ = {
 			isa = PBXGroup;
 			children = (
+				BC50CE8B1DDE3BC6002173F4 /* global.h */,
+				BC50CE871DDE311C002173F4 /* pindefinitions.h */,
 				BC50CE711DDE3076002173F4 /* main.c */,
+				BC50CE881DDE3B13002173F4 /* calibration.h */,
+				BC50CE8C1DDE3F8F002173F4 /* calibration.c */,
 				BC50CE731DDE3076002173F4 /* Makefiles */,
 			);
 			path = EOS_Switch;
@@ -183,6 +192,7 @@
 			files = (
 				BC50CE751DDE3076002173F4 /* Makefile in Sources */,
 				BC50CE721DDE3076002173F4 /* main.c in Sources */,
+				BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +380,7 @@
 				BC50CE7A1DDE3076002173F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BC50CE7B1DDE3076002173F4 /* Build configuration list for PBXLegacyTarget "Build" */ = {
 			isa = XCConfigurationList;
@@ -378,6 +389,7 @@
 				BC50CE7D1DDE3076002173F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BC50CE7E1DDE3076002173F4 /* Build configuration list for PBXLegacyTarget "Upload" */ = {
 			isa = XCConfigurationList;
@@ -386,6 +398,7 @@
 				BC50CE801DDE3076002173F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BC50CE811DDE3076002173F4 /* Build configuration list for PBXLegacyTarget "Clean" */ = {
 			isa = XCConfigurationList;
@@ -394,6 +407,7 @@
 				BC50CE831DDE3076002173F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BC50CE841DDE3076002173F4 /* Build configuration list for PBXNativeTarget "Index" */ = {
 			isa = XCConfigurationList;
@@ -402,6 +416,7 @@
 				BC50CE861DDE3076002173F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
