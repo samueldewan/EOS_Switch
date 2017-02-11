@@ -48,8 +48,9 @@ MCU = atmega328p
 #     processor frequency. You can then use this symbol in your source code to 
 #     calculate timings. Do NOT tack on a 'UL' at the end, this will be done
 #     automatically to create a 32-bit value in your source code.
-F_CPU = 8000000
+F_CPU = 16000000
 
+#AVRDUDE_PROGRAMMER = buspirate
 AVRDUDE_PROGRAMMER = stk500v2
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
@@ -65,7 +66,8 @@ TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.)
 
-SRC = $(wildcard *.c)
+#SRC = $(wildcard *.c)
+SRC = $(wildcard *.c) $(wildcard *.cpp) $(wildcard libethernet/*.c)
 
 OBJDIR = Builds
 # List Assembler source files here.
@@ -299,10 +301,12 @@ MSG_CLEANING = Cleaning project:
 
 
 # Define all object files.
-OBJ = $(addprefix $(OBJDIR)/,$(SRC:.c=.o)) $(addprefix $(OBJDIR)/,$(ASRC:.S=.o))
+#OBJ = $(addprefix $(OBJDIR)/,$(SRC:.c=.o)) $(addprefix $(OBJDIR)/,$(ASRC:.S=.o))
+OBJ = $(addprefix $(OBJDIR)/,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))) $(addprefix $(OBJDIR)/,$(ASRC:.S=.o))
 
 # Define all listing files.
-LST = $(addprefix $(OBJDIR)/,$(SRC:.c=.lst)) $(addprefix $(OBJDIR)/,$(ASRC:.S=.lst))
+#LST = $(addprefix $(OBJDIR)/,$(SRC:.c=.lst)) $(addprefix $(OBJDIR)/,$(ASRC:.S=.lst))
+LST = $(addprefix $(OBJDIR)/,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))) $(addprefix $(OBJDIR)/,$(ASRC:.S=.lst))
 
 
 # Compiler flags to generate dependency files.
@@ -475,6 +479,20 @@ $(OBJDIR)/%.o : %.S
 $(OBJDIR)/%.i : %.c
 	$(CC) -E -mmcu=$(MCU) -I. $(CFLAGS) $< -o $@ 
 
+# Compile: create object files from C++ source files.
+$(OBJDIR)/%.o : %.cpp
+	@echo
+	@echo $(MSG_COMPILING) $<
+	$(CC) -c $(ALL_CFLAGS) "$(abspath $<)" -o $@
+
+
+# Compile: create assembler files from C++ source files.
+$(OBJDIR)/%.s : %.cpp
+	$(CC) -S $(ALL_CFLAGS) $< -o $@
+
+# Create preprocessed source for use in sending a bug report.
+$(OBJDIR)/%.i : %.cpp
+	$(CC) -E -mmcu=$(MCU) -I. $(CFLAGS) $< -o $@
 
 # Target: clean project.
 clean: begin clean_list end
@@ -491,8 +509,10 @@ clean_list :
 	$(REMOVE) $(OBJDIR)/$(TARGET).lss
 	$(REMOVE) $(OBJ)
 	$(REMOVE) $(LST)
-	$(REMOVE) $(OBJDIR)/$(SRC:.c=.s)
-	$(REMOVE) $(OBJDIR)/$(SRC:.c=.d)
+#$(REMOVE) $(OBJDIR)/$(SRC:.c=.s)
+#$(REMOVE) $(OBJDIR)/$(SRC:.c=.d)
+	$(REMOVE) $(OBJDIR)/$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
+	$(REMOVE) $(OBJDIR)/$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 	$(REMOVE) $(OBJDIR)/.dep/*
 
 

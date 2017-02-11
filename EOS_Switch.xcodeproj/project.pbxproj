@@ -7,12 +7,53 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BC00628B1E439ECB004F2CE6 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062891E439ECB004F2CE6 /* network.c */; };
+		BC0062A51E43A15E004F2CE6 /* spi.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062A41E43A15E004F2CE6 /* spi.c */; };
+		BC0062A71E43A3C6004F2CE6 /* arp_table.c in Sources */ = {isa = PBXBuildFile; fileRef = BC00628D1E439EFD004F2CE6 /* arp_table.c */; };
+		BC0062A81E43A3D3004F2CE6 /* dhcp.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062911E439EFD004F2CE6 /* dhcp.c */; };
+		BC0062A91E43A3D5004F2CE6 /* dns.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062931E439EFD004F2CE6 /* dns.c */; };
+		BC0062AA1E43A3DE004F2CE6 /* enc28j60.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062951E439EFD004F2CE6 /* enc28j60.c */; };
+		BC0062AB1E43A3DE004F2CE6 /* ethernet.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062971E439EFD004F2CE6 /* ethernet.c */; };
+		BC0062AC1E43A3DE004F2CE6 /* ntp.c in Sources */ = {isa = PBXBuildFile; fileRef = BC00629B1E439EFD004F2CE6 /* ntp.c */; };
+		BC0062AD1E43A3DE004F2CE6 /* tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = BC00629E1E439EFD004F2CE6 /* tcp.c */; };
+		BC0062AE1E43A3DE004F2CE6 /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062A01E439EFD004F2CE6 /* udp.c */; };
+		BC0062AF1E43A3DE004F2CE6 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062A21E439EFD004F2CE6 /* utils.c */; };
+		BC3053CD1E4E8EAF0007CDC8 /* serial.c in Sources */ = {isa = PBXBuildFile; fileRef = BC3053CC1E4E8EAF0007CDC8 /* serial.c */; };
 		BC50CE721DDE3076002173F4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE711DDE3076002173F4 /* main.c */; };
 		BC50CE751DDE3076002173F4 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE741DDE3076002173F4 /* Makefile */; };
 		BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE8C1DDE3F8F002173F4 /* calibration.c */; };
+		BCD4837F1E4EC53B00EA8395 /* str_tools.c in Sources */ = {isa = PBXBuildFile; fileRef = BCD4837D1E4EC53B00EA8395 /* str_tools.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BC0062891E439ECB004F2CE6 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
+		BC00628A1E439ECB004F2CE6 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = network.h; sourceTree = "<group>"; };
+		BC00628D1E439EFD004F2CE6 /* arp_table.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = arp_table.c; sourceTree = "<group>"; };
+		BC00628E1E439EFD004F2CE6 /* arp_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arp_table.h; sourceTree = "<group>"; };
+		BC00628F1E439EFD004F2CE6 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		BC0062901E439EFD004F2CE6 /* config_checker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config_checker.h; sourceTree = "<group>"; };
+		BC0062911E439EFD004F2CE6 /* dhcp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dhcp.c; sourceTree = "<group>"; };
+		BC0062921E439EFD004F2CE6 /* dhcp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dhcp.h; sourceTree = "<group>"; };
+		BC0062931E439EFD004F2CE6 /* dns.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dns.c; sourceTree = "<group>"; };
+		BC0062941E439EFD004F2CE6 /* dns.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dns.h; sourceTree = "<group>"; };
+		BC0062951E439EFD004F2CE6 /* enc28j60.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = enc28j60.c; sourceTree = "<group>"; };
+		BC0062961E439EFD004F2CE6 /* enc28j60.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = enc28j60.h; sourceTree = "<group>"; };
+		BC0062971E439EFD004F2CE6 /* ethernet.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ethernet.c; sourceTree = "<group>"; };
+		BC0062981E439EFD004F2CE6 /* ethernet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ethernet.h; sourceTree = "<group>"; };
+		BC0062991E439EFD004F2CE6 /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
+		BC00629A1E439EFD004F2CE6 /* libethernet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libethernet.h; sourceTree = "<group>"; };
+		BC00629B1E439EFD004F2CE6 /* ntp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ntp.c; sourceTree = "<group>"; };
+		BC00629C1E439EFD004F2CE6 /* ntp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ntp.h; sourceTree = "<group>"; };
+		BC00629D1E439EFD004F2CE6 /* spi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spi.h; sourceTree = "<group>"; };
+		BC00629E1E439EFD004F2CE6 /* tcp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tcp.c; sourceTree = "<group>"; };
+		BC00629F1E439EFD004F2CE6 /* tcp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tcp.h; sourceTree = "<group>"; };
+		BC0062A01E439EFD004F2CE6 /* udp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = udp.c; sourceTree = "<group>"; };
+		BC0062A11E439EFD004F2CE6 /* udp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = udp.h; sourceTree = "<group>"; };
+		BC0062A21E439EFD004F2CE6 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		BC0062A31E439EFD004F2CE6 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		BC0062A41E43A15E004F2CE6 /* spi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = spi.c; sourceTree = "<group>"; };
+		BC3053CB1E4E8EAF0007CDC8 /* serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serial.h; sourceTree = "<group>"; };
+		BC3053CC1E4E8EAF0007CDC8 /* serial.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = serial.c; sourceTree = "<group>"; };
 		BC50CE6E1DDE3076002173F4 /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC50CE711DDE3076002173F4 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		BC50CE741DDE3076002173F4 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -20,9 +61,42 @@
 		BC50CE881DDE3B13002173F4 /* calibration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calibration.h; sourceTree = "<group>"; };
 		BC50CE8B1DDE3BC6002173F4 /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
 		BC50CE8C1DDE3F8F002173F4 /* calibration.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = calibration.c; sourceTree = "<group>"; };
+		BCD4837D1E4EC53B00EA8395 /* str_tools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = str_tools.c; path = ../str_tools.c; sourceTree = "<group>"; };
+		BCD4837E1E4EC53B00EA8395 /* str_tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = str_tools.h; path = ../str_tools.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		BC00628C1E439EFD004F2CE6 /* libethernet */ = {
+			isa = PBXGroup;
+			children = (
+				BC00628D1E439EFD004F2CE6 /* arp_table.c */,
+				BC00628E1E439EFD004F2CE6 /* arp_table.h */,
+				BC00628F1E439EFD004F2CE6 /* config.h */,
+				BC0062901E439EFD004F2CE6 /* config_checker.h */,
+				BC0062911E439EFD004F2CE6 /* dhcp.c */,
+				BC0062921E439EFD004F2CE6 /* dhcp.h */,
+				BC0062931E439EFD004F2CE6 /* dns.c */,
+				BC0062941E439EFD004F2CE6 /* dns.h */,
+				BC0062951E439EFD004F2CE6 /* enc28j60.c */,
+				BC0062961E439EFD004F2CE6 /* enc28j60.h */,
+				BC0062971E439EFD004F2CE6 /* ethernet.c */,
+				BC0062981E439EFD004F2CE6 /* ethernet.h */,
+				BC0062991E439EFD004F2CE6 /* global.h */,
+				BC00629A1E439EFD004F2CE6 /* libethernet.h */,
+				BC00629B1E439EFD004F2CE6 /* ntp.c */,
+				BC00629C1E439EFD004F2CE6 /* ntp.h */,
+				BC0062A41E43A15E004F2CE6 /* spi.c */,
+				BC00629D1E439EFD004F2CE6 /* spi.h */,
+				BC00629E1E439EFD004F2CE6 /* tcp.c */,
+				BC00629F1E439EFD004F2CE6 /* tcp.h */,
+				BC0062A01E439EFD004F2CE6 /* udp.c */,
+				BC0062A11E439EFD004F2CE6 /* udp.h */,
+				BC0062A21E439EFD004F2CE6 /* utils.c */,
+				BC0062A31E439EFD004F2CE6 /* utils.h */,
+			);
+			path = libethernet;
+			sourceTree = "<group>";
+		};
 		BC50CE631DDE3076002173F4 = {
 			isa = PBXGroup;
 			children = (
@@ -45,8 +119,15 @@
 				BC50CE8B1DDE3BC6002173F4 /* global.h */,
 				BC50CE871DDE311C002173F4 /* pindefinitions.h */,
 				BC50CE711DDE3076002173F4 /* main.c */,
+				BC3053CB1E4E8EAF0007CDC8 /* serial.h */,
+				BC3053CC1E4E8EAF0007CDC8 /* serial.c */,
+				BC00628A1E439ECB004F2CE6 /* network.h */,
+				BC0062891E439ECB004F2CE6 /* network.c */,
+				BCD4837E1E4EC53B00EA8395 /* str_tools.h */,
+				BCD4837D1E4EC53B00EA8395 /* str_tools.c */,
 				BC50CE881DDE3B13002173F4 /* calibration.h */,
 				BC50CE8C1DDE3F8F002173F4 /* calibration.c */,
+				BC00628C1E439EFD004F2CE6 /* libethernet */,
 				BC50CE731DDE3076002173F4 /* Makefiles */,
 			);
 			path = EOS_Switch;
@@ -190,8 +271,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC0062AC1E43A3DE004F2CE6 /* ntp.c in Sources */,
+				BC0062AF1E43A3DE004F2CE6 /* utils.c in Sources */,
+				BC00628B1E439ECB004F2CE6 /* network.c in Sources */,
+				BC0062A81E43A3D3004F2CE6 /* dhcp.c in Sources */,
+				BC0062AB1E43A3DE004F2CE6 /* ethernet.c in Sources */,
+				BCD4837F1E4EC53B00EA8395 /* str_tools.c in Sources */,
+				BC0062AA1E43A3DE004F2CE6 /* enc28j60.c in Sources */,
+				BC0062AE1E43A3DE004F2CE6 /* udp.c in Sources */,
+				BC0062A51E43A15E004F2CE6 /* spi.c in Sources */,
+				BC3053CD1E4E8EAF0007CDC8 /* serial.c in Sources */,
+				BC0062A91E43A3D5004F2CE6 /* dns.c in Sources */,
 				BC50CE751DDE3076002173F4 /* Makefile in Sources */,
 				BC50CE721DDE3076002173F4 /* main.c in Sources */,
+				BC0062AD1E43A3DE004F2CE6 /* tcp.c in Sources */,
+				BC0062A71E43A3C6004F2CE6 /* arp_table.c in Sources */,
 				BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
