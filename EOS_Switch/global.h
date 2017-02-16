@@ -25,10 +25,11 @@
 #define SETTING_DNS_ADDR        28      // 4 bytes
 #define SETTING_NTP_ADDR        32      // 4 bytes
 #define SETTING_GMT_OFFSET      36      // 1 byte
-#define SETTING_HOSTNAME        37      // 32 bytes
+#define SETTING_DCHP            37      // 1 byte
+#define SETTING_HOSTNAME        38      // 32 bytes
 
-#define SETTING_TARGET_IP       70      // 4 bytes
-#define SETTING_TARGET_PORT     74      // 2 bytes
+#define SETTING_TARGET_IP       75      // 4 bytes
+#define SETTING_TARGET_PORT     79      // 2 bytes
 
 #define SETTING_T_ONE_RISE      224     // 200 bytes
 #define SETTING_T_ONE_FALL      424     // 200 bytes

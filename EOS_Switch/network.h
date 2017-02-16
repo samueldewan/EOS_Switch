@@ -32,10 +32,22 @@ extern void reinit_network (void);
 int network_send_from_eeprom (uint16_t address, int length);
 
 /**
- * Gets the current IP address as an array of bytes
- * @param address An array of at least 4 bytes in which the ip address will be placed
+ * Gets the current IP address
+ * @return The IP address
  */
-extern void network_get_ip_addr(uint8_t *address);
+extern uint32_t network_get_ip_addr(void);
+
+/**
+ * Gets the address of the router
+ * @return The IP address
+ */
+extern uint32_t network_get_router_addr(void);
+
+/**
+ * Gets the the netmask
+ * @return The netmask
+ */
+extern uint32_t network_get_netmask(void);
 
 /**
  *  Network actions to be performed in each main loop

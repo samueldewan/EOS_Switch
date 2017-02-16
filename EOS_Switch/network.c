@@ -8,6 +8,8 @@
 
 #include "network.h"
 
+#include "pindefinitions.h"
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -21,11 +23,7 @@ static UDPSocket eos_connection;
 
 void init_network (void)
 {
-    // Timer 1 (network clock)
-    TCCR1B |= (1<<WGM11);                           // Set the Timer Mode to CTC
-    TIMSK1 |= (1<<OCIE1A);                          // Set the ISR COMPA vector (enables COMP interupt)
-    OCR1A = 31250;                                  // 1 Hz
-    TCCR1B |= (1<<CS12);                            // set prescaler to 256 and start timer 1
+    STAT_TWO_PORT |= (1<<STAT_TWO_NUM);
     
     spi_initialise(&PORTB, &DDRB, PB5, PB4, PB3, PB2);
     uint8_t mac[6];
@@ -37,12 +35,24 @@ void init_network (void)
     
     // Initialise all enabled modules of the ethernet stack
 #ifdef IMPLEMENT_DHCP
-    ethernet_initialise_dhcp(hostname, 5);
-    //        ethernet_initialise_dhcp(NULL, ETHERNET_INIT_TIMEOUT);
+    if (eeprom_read_byte(SETTING_DCHP)) {
+        ethernet_initialise_dhcp(hostname, 5);
+    } else {
+        ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
+        ethernet_wait_for_link_status(0);
+    }
 #else
     ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
     ethernet_wait_for_link_status(0);
 #endif // IMPLEMENT_DHCP
+    
+    
+    // Timer 1 (network clock)
+    TCCR1B |= (1<<WGM11);                           // Set the Timer Mode to CTC
+    TIMSK1 |= (1<<OCIE1A);                          // Set the ISR COMPA vector (enables COMP interupt)
+    OCR1A = 31250;                                  // 1 Hz
+    TCCR1B |= (1<<CS12);                            // set prescaler to 256 and start timer 1
+    
     
     // Initialise the DNS resolver module
 #ifdef IMPLEMENT_DNS
@@ -56,13 +66,17 @@ void init_network (void)
     // Initialise the NTP client module
 #ifdef IMPLEMENT_NTP
 #	ifdef IMPLEMENT_DHCP
-    ntp_initialise(dhcp_get_ntp_server_ip(), eeprom_read_byte(SETTING_GMT_OFFSET));
+    if (eeprom_read_byte(SETTING_DCHP)) {
+        ntp_initialise(dhcp_get_ntp_server_ip(), eeprom_read_byte(SETTING_GMT_OFFSET));
+    } else {
+        ntp_initialise(eeprom_read_dword(SETTING_NTP_ADDR), eeprom_read_byte(SETTING_GMT_OFFSET));
+    }
 #	else
     ntp_initialise(eeprom_read_dword(SETTING_NTP_ADDR), eeprom_read_byte(SETTING_GMT_OFFSET));
 #	endif //IMPLEMENT_DHCP
 #endif //IMPLEMENT_DNS
     
-    eos_connection = udp_connect(eeprom_read_dword(SETTING_TARGET_IP), eeprom_read_dword(SETTING_TARGET_PORT), 5, NULL);
+    //eos_connection = udp_connect(eeprom_read_dword(SETTING_TARGET_IP), eeprom_read_dword(SETTING_TARGET_PORT), 5, NULL);
 }
 
 int network_send_from_eeprom (uint16_t address, int length)
@@ -79,14 +93,19 @@ int network_send_from_eeprom (uint16_t address, int length)
     return length;
 }
 
-void network_get_ip_addr(uint8_t *address)
+uint32_t network_get_ip_addr()
 {
-    uint32_t ip = ethernet_get_ip();
-    
-    address[0] = ip & 0xFF;
-    address[1] = (ip >> 8) & 0xFF;
-    address[2] = (ip >> 16) & 0xFF;
-    address[3] = (ip >> 24) & 0xFF;
+    return ethernet_get_ip();
+}
+
+uint32_t network_get_router_addr()
+{
+    return ethernet_get_router_ip();
+}
+
+uint32_t network_get_netmask()
+{
+    return ethernet_get_netmask();
 }
 
 void network_service (void)
