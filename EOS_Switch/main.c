@@ -144,18 +144,20 @@ int main(void)
     stat_one_period = 500;
     flags |= (1<<FLAG_STAT_ONE_ON);
     
-    //init_network();
+    if (!init_network()) {
+        flags |= (1<<FLAG_ONLINE);
+    }
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
-//    uint8_t mac[] = {55, 2, 3, 4, 5, 6};
+//    uint8_t mac[] = {0xDD, 0x66, 0x0C, 0x0A, 0x2A, 0x79};
 //    eeprom_update_block(mac, SETTING_MAC_ADDR, 6);
-//    eeprom_update_dword(SETTING_IP_ADDR, MAKE_IP(192, 168, 1, 75));
-//    eeprom_update_dword(SETTING_ROUTER_ADDR, MAKE_IP(192, 168, 1, 1));
-//    eeprom_update_dword(SETTING_DNS_ADDR, MAKE_IP(192, 168, 1, 1));
+//    eeprom_update_dword(SETTING_IP_ADDR, MAKE_IP(169, 254, 6, 150));
+//    eeprom_update_dword(SETTING_ROUTER_ADDR, MAKE_IP(169, 254, 6, 133));
+//    eeprom_update_dword(SETTING_DNS_ADDR, MAKE_IP(169, 254, 6, 133));
 //    eeprom_update_dword(SETTING_NTP_ADDR, MAKE_IP(132,246,11,227));
 //    eeprom_update_dword(SETTING_NETMASK, MAKE_IP(255,255,255,0));
 //    eeprom_update_byte(SETTING_GMT_OFFSET, 2);
-//    eeprom_update_byte(SETTING_DCHP, 1);
+    eeprom_update_byte(SETTING_DCHP, 0);
 //    eeprom_update_dword(SETTING_TARGET_IP, MAKE_IP(192, 168, 1, 100));
 //    eeprom_update_word(SETTING_TARGET_PORT, 56789);
 //
@@ -176,13 +178,14 @@ int main(void)
 	return 0; // never reached
 }
 
-static const char menu_cmd_help[] PROGMEM =        "help";
-static const char menu_cmd_clear[] PROGMEM =       "clear";
-static const char menu_cmd_ipinfo[] PROGMEM =      "ipinfo";
-static const char menu_cmd_targetinfo[] PROGMEM =  "targetinfo";
-static const char menu_cmd_dhcp[] PROGMEM =        "dhcp";
-static const char menu_cmd_payoad[] PROGMEM =      "payload";
-static const char menu_cmd_set[] PROGMEM =         "set";
+static const char menu_cmd_help[] PROGMEM =         "help";
+static const char menu_cmd_clear[] PROGMEM =        "clear";
+static const char menu_cmd_ipinfo[] PROGMEM =       "ipinfo";
+static const char menu_cmd_targetinfo[] PROGMEM =   "targetinfo";
+static const char menu_cmd_dhcp[] PROGMEM =         "dhcp";
+static const char menu_cmd_payoad[] PROGMEM =       "payload";
+static const char menu_cmd_set[] PROGMEM =          "set";
+static const char menu_cmd_testnet[] PROGMEM =      "testnet";
 
 static void main_loop ()
 {
@@ -243,7 +246,9 @@ static void main_loop ()
                     print_payloads();
                 } else if (!strncasecmp_P(menu_buffer, menu_cmd_set, 3)) {
                     menu_status = SET;
-                    process_set(/*strtok(str, " ")*/menu_buffer + 3);
+                    process_set(menu_buffer + 3);
+                } else if (!strncasecmp_P(menu_buffer, menu_cmd_testnet, 3)) {
+                    network_send_string(menu_buffer + 8);
                 } else {
                     serial_put_string_P(menu_unkown_cmd_prt1);
                     serial_put_byte('"');
@@ -282,9 +287,10 @@ static void main_loop ()
         STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
     }
     
-//    if (flags &= (1<<FLAG_ONLINE)) {
-//        network_service();
-//    }
+    // Network
+    if (flags & (1<<FLAG_ONLINE)) {
+        network_service();
+    }
 }
 
 static inline void print_prompt(void) {
@@ -532,7 +538,7 @@ static inline void parse_value(char* str, uint16_t address, uint8_t length) {
         case 6:
             // mac addr
             next = str + strlen(str);
-            eeprom_write_byte(address, strtol(str, &next, 10));
+            eeprom_write_byte(address, strtol(str, &next, 16));
             eeprom_write_byte(address + 1, strtol(next + 1, &next, 16));
             eeprom_write_byte(address + 2, strtol(next + 1, &next, 16));
             eeprom_write_byte(address + 3, strtol(next + 1, &next, 16));

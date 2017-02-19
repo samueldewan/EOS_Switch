@@ -30,7 +30,11 @@ extern void reinit_network (void);
  *  @param length The length of the data buffer
  *  @return The number of bytes which where sent
  */
-int network_send_from_eeprom (uint16_t address, int length);
+extern int network_send_from_eeprom (uint16_t address, int length);
+
+extern int network_send_string_P (const char *str);
+
+extern int network_send_string (const char *str);
 
 /**
  * Gets the current IP address
