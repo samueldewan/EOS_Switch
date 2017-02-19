@@ -28,6 +28,7 @@
 #include <util/delay.h>
 
 #include "global.h"
+#include "../global.h"
 #include "utils.h"
 #include "enc28j60.h"
 #include "arp_table.h"
@@ -1106,13 +1107,15 @@ void _ethernet_set_ip_netmask_router(uint32_t IP, uint32_t NetMask, uint32_t Rou
 #ifdef IMPLEMENT_DHCP
 bool _ethernet_configure_via_dhcp(const char* Hostname, uint16_t Timeout)
 {
+    uint32_t start_time = millis;
+    
 	// Wait until we're connected
 	ethernet_wait_for_link_status(Timeout);
 
 	// Wait until we've got a valid DHCP configuration
 	bool HasNewConfig = false;
 	uint32_t IP, NetMask, RouterIP;
-	while(!HasNewConfig)
+	while(!HasNewConfig && ((millis - start_time) < Timeout))
 		HasNewConfig = dhcp_request(Hostname,Timeout,&IP,&NetMask,&RouterIP,NULL,NULL);
 
 	// Update our data

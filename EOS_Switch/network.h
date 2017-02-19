@@ -15,8 +15,9 @@
 
 /**
  *  Initilize the network interface
+ *  @return 0 If init was sucessfull, -1 otherwise
  */
-extern void init_network (void);
+extern int init_network (void);
 
 /**
  *  Reinitialize the network

@@ -9,13 +9,14 @@
 #include "serial.h"
 #include "network.h"
 
-//#include "libethernet/libethernet.h"
+#include "libethernet/libethernet.h"
 
 //MARK: Constants
 
 // MARK: Function prototypes
 static void main_loop(void);
 
+static inline void print_prompt(void);
 static inline void print_ipinfo(void);
 static inline void print_targetinfo(void);
 static inline void print_payloads(void);
@@ -26,7 +27,8 @@ static inline void process_set(char* property);
 volatile uint32_t millis;
 volatile uint8_t flags;
 
-static uint32_t last_status;
+static uint32_t last_stat_one_time;
+static uint16_t stat_one_period;
 
 struct trigger_data {
     uint8_t t_one_dirty: 1;
@@ -42,6 +44,7 @@ static char menu_buffer[200];
 
 // MARK: Strings
 static const char prompt_string[] PROGMEM = "> ";
+static const char prompt_string_offline[] PROGMEM = "(offline)> ";
 static const char welcome_string[] PROGMEM = "EOS-Switch\tv1.0\n";
 static const char help_string[] PROGMEM = "The following commands are avaliable:\n"  //43
                                           "\tIPINFO: Displays current IP configuration information.\n"   //57
@@ -135,12 +138,13 @@ int main(void)
     init_timers();
     init_serial();
     flags |= (1<<FLAG_SERIAL_LOOPBACK);             // Enable serial loopback
-    
-    STAT_TWO_PORT &= !(1<<STAT_TWO_NUM);
-    
+
     sei();
     
-    init_network();
+    stat_one_period = 500;
+    flags |= (1<<FLAG_STAT_ONE_ON);
+    
+    //init_network();
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
 //    uint8_t mac[] = {55, 2, 3, 4, 5, 6};
@@ -164,7 +168,7 @@ int main(void)
     trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
     
     serial_put_string_P(welcome_string);
-    serial_put_string_P(prompt_string);
+    print_prompt();
 
     for (;;) {
         main_loop();
@@ -182,6 +186,33 @@ static const char menu_cmd_set[] PROGMEM =         "set";
 
 static void main_loop ()
 {
+    
+    // Trigger One
+    if (trigger_flags.t_one_dirty) {
+        trigger_flags.t_one_dirty  = 0;
+        
+        if (trigger_flags.t_one_state && !(TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
+            // was off, now on - Rising Edge
+        } else if (!trigger_flags.t_one_state && (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
+            // was on, now off - Falling Edge
+        }
+        
+        trigger_flags.t_one_state = (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM));
+    }
+    
+    // Trigger Two
+    if (trigger_flags.t_two_dirty) {
+        trigger_flags.t_two_dirty  = 0;
+        
+        if (trigger_flags.t_two_state && !(TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
+            // was off, now on - Rising Edge
+        } else if (!trigger_flags.t_two_state && (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
+            // was on, now off - Falling Edge
+        }
+        
+        trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
+    }
+    
     serial_service();
     
     // Menu
@@ -223,7 +254,7 @@ static void main_loop ()
                 }
                 
                 if (menu_status == NONE) {
-                    serial_put_string_P(prompt_string);
+                    print_prompt();
                 }
             }
             break;
@@ -236,40 +267,32 @@ static void main_loop ()
             process_set(NULL);
             break;
     }
-    
-    // Trigger One
-    if (trigger_flags.t_one_dirty) {
-        trigger_flags.t_one_dirty  = 0;
-        
-        if (trigger_flags.t_one_state && !(TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
-            // was off, now on - Rising Edge
-        } else if (!trigger_flags.t_one_state && (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
-            // was on, now off - Falling Edge
+
+    // STAT_ONE
+    if (flags & (1<<FLAG_STAT_ONE_ON)) {
+        if (stat_one_period != 0) {
+            if ((millis - last_stat_one_time) > stat_one_period) {
+                last_stat_one_time = millis;
+                STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
+            }
+        } else {
+            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
         }
-        
-        trigger_flags.t_one_state = (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM));
+    } else {
+        STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
     }
     
-    // Trigger Two
-    if (trigger_flags.t_two_dirty) {
-        trigger_flags.t_two_dirty  = 0;
-        
-        if (trigger_flags.t_two_state && !(TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
-            // was off, now on - Rising Edge
-        } else if (!trigger_flags.t_two_state && (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
-            // was on, now off - Falling Edge
-        }
-        
-        trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
+//    if (flags &= (1<<FLAG_ONLINE)) {
+//        network_service();
+//    }
+}
+
+static inline void print_prompt(void) {
+    if (flags & (1<<FLAG_ONLINE)) {
+        serial_put_string_P(prompt_string);
+    } else {
+        serial_put_string_P(prompt_string_offline);
     }
-    
-    // heart beat
-    if ((millis - last_status) > 500) {
-        last_status = millis;
-        STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
-    }
-    
-    network_service();
 }
 
 static inline void print_addr(uint16_t addr, char delim, int len, int radix, char *temp)
@@ -381,7 +404,7 @@ static inline void print_payloads(void)
             serial_put_byte('\n');
             menu_state = 0;
             menu_status = NONE;
-            serial_put_string_P(prompt_string);
+            print_prompt();
             break;
     }
 }
@@ -564,7 +587,7 @@ static inline void process_set(char* property)
     
             parse_value(menu_buffer, *((uint16_t*)&menu_state + 1), *((uint8_t*)&menu_state));
             
-            serial_put_string_P(prompt_string);
+            print_prompt();
             menu_status = NONE;
         }
     }

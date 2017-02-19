@@ -21,22 +21,23 @@ static UDPSocket eos_connection;
 
 // MARK: Functions
 
-void init_network (void)
+int init_network (void)
 {
-    STAT_TWO_PORT |= (1<<STAT_TWO_NUM);
-    
     spi_initialise(&PORTB, &DDRB, PB5, PB4, PB3, PB2);
     uint8_t mac[6];
     eeprom_read_block(SETTING_MAC_ADDR, mac, 6);
     enc28j60_initialise(mac, true);
     
     char hostname[32];
-    eeprom_read_block(SETTING_HOSTNAME, hostname, 32);
+    eeprom_read_block(hostname, SETTING_HOSTNAME, 32);
     
     // Initialise all enabled modules of the ethernet stack
 #ifdef IMPLEMENT_DHCP
     if (eeprom_read_byte(SETTING_DCHP)) {
-        ethernet_initialise_dhcp(hostname, 5);
+        ethernet_initialise_dhcp(hostname, 1000);
+        if (ethernet_get_router_ip() == 0) {
+            return -1;
+        }
     } else {
         ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
         ethernet_wait_for_link_status(0);
@@ -45,7 +46,7 @@ void init_network (void)
     ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
     ethernet_wait_for_link_status(0);
 #endif // IMPLEMENT_DHCP
-    
+
     
     // Timer 1 (network clock)
     TCCR1B |= (1<<WGM11);                           // Set the Timer Mode to CTC
@@ -77,6 +78,8 @@ void init_network (void)
 #endif //IMPLEMENT_DNS
     
     //eos_connection = udp_connect(eeprom_read_dword(SETTING_TARGET_IP), eeprom_read_dword(SETTING_TARGET_PORT), 5, NULL);
+    
+    return 0;
 }
 
 int network_send_from_eeprom (uint16_t address, int length)
@@ -84,7 +87,7 @@ int network_send_from_eeprom (uint16_t address, int length)
     uint8_t* buffer;
     size_t buffer_size;
     udp_start_packet(eos_connection, &buffer, &buffer_size);
-    length = (length > buffer_size) ? length : buffer_size;
+    length = (length < buffer_size) ? length : buffer_size;
     
     eeprom_read_block(address, buffer, length);
     
