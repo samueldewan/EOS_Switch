@@ -67,7 +67,7 @@ TARGET = main
 # List C source files here. (C dependencies are automatically generated.)
 
 #SRC = $(wildcard *.c)
-SRC = $(wildcard *.c) $(wildcard *.cpp) $(wildcard libethernet/*.c)
+SRC = $(wildcard *.c) $(wildcard *.cpp) $(wildcard network/*.c) $(wildcard network/*.cpp)
 
 OBJDIR = Builds
 # List Assembler source files here.

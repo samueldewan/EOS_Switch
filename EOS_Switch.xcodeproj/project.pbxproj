@@ -12,6 +12,7 @@
 		BC50CE721DDE3076002173F4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE711DDE3076002173F4 /* main.c */; };
 		BC50CE751DDE3076002173F4 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE741DDE3076002173F4 /* Makefile */; };
 		BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE8C1DDE3F8F002173F4 /* calibration.c */; };
+		BCCE03641E5A2E6400305093 /* spi.c in Sources */ = {isa = PBXBuildFile; fileRef = BCCE03631E5A2E6400305093 /* spi.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,8 @@
 		BC50CE881DDE3B13002173F4 /* calibration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calibration.h; sourceTree = "<group>"; };
 		BC50CE8B1DDE3BC6002173F4 /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
 		BC50CE8C1DDE3F8F002173F4 /* calibration.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = calibration.c; sourceTree = "<group>"; };
+		BCCE03621E5A2E5000305093 /* spi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spi.h; sourceTree = "<group>"; };
+		BCCE03631E5A2E6400305093 /* spi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = spi.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -57,6 +60,7 @@
 				BC0062891E439ECB004F2CE6 /* network.c */,
 				BC50CE881DDE3B13002173F4 /* calibration.h */,
 				BC50CE8C1DDE3F8F002173F4 /* calibration.c */,
+				BCCE03611E5A2E5000305093 /* network */,
 				BC50CE731DDE3076002173F4 /* Makefiles */,
 			);
 			path = EOS_Switch;
@@ -68,6 +72,15 @@
 				BC50CE741DDE3076002173F4 /* Makefile */,
 			);
 			name = Makefiles;
+			sourceTree = "<group>";
+		};
+		BCCE03611E5A2E5000305093 /* network */ = {
+			isa = PBXGroup;
+			children = (
+				BCCE03621E5A2E5000305093 /* spi.h */,
+				BCCE03631E5A2E6400305093 /* spi.c */,
+			);
+			path = network;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,6 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCCE03641E5A2E6400305093 /* spi.c in Sources */,
 				BC00628B1E439ECB004F2CE6 /* network.c in Sources */,
 				BC3053CD1E4E8EAF0007CDC8 /* serial.c in Sources */,
 				BC50CE751DDE3076002173F4 /* Makefile in Sources */,
