@@ -183,6 +183,7 @@ void spi_service (void)
     ATOMIC_BLOCK(ATOMIC_FORCEON) {
         if ((!(flags & (1<<FLAG_SPI_LOCK))) && (out_buffer_withdraw_p != out_buffer_insert_p)) {
             flags |= (1<<FLAG_SPI_LOCK);
+            SPI_PORT &= !(1<<SPI_SS_NUM);
             SPDR = serial_out_buffer[out_buffer_withdraw_p];
             spi_transfers[spi_current_transfer].bytes_out_left--;
             increment_buffer_withdraw(&out_buffer_withdraw_p, SPI_OUT_BUFFER_LENGTH);
@@ -208,8 +209,10 @@ ISR (SPI_STC_vect)
         // No bytes left to be transmitted
         if (spi_transfers[spi_current_transfer].bytes_in_left == -1) {
             // No bytes to be recieved
+            SPI_PORT |= (1<<SPI_SS_NUM);
             circular_increment(&spi_current_transfer, SPI_CONCURRENT_TRANSFERS);
             if (spi_transfers[spi_current_transfer].bytes_out_left > 0) {
+                SPI_PORT &= !(1<<SPI_SS_NUM);
                 SPDR = spi_get_next_byte_out();
                 spi_transfers[spi_current_transfer].bytes_out_left--;
             } else {
@@ -219,8 +222,10 @@ ISR (SPI_STC_vect)
             // Receive last byte
             spi_in_append_byte(data);
             
+            SPI_PORT |= (1<<SPI_SS_NUM);
             circular_increment(&spi_current_transfer, SPI_CONCURRENT_TRANSFERS);
             if (spi_transfers[spi_current_transfer].bytes_out_left > 0) {
+                SPI_PORT &= !(1<<SPI_SS_NUM);
                 SPDR = spi_get_next_byte_out();
                 spi_transfers[spi_current_transfer].bytes_out_left--;
             } else {
