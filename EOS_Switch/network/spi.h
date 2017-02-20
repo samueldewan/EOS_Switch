@@ -51,7 +51,15 @@ extern uint8_t spi_transfer_avaliable (void);
 extern void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
 
 /**
- *  Start a transfer on the SPI interface with source data in EEPROM
+ *  Start a transfer on the SPI interface with source data from programspace
+ *  @param bytes_out The number of bytes to be transmitted
+ *  @param out_buffer A programspace pointer the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in);
+
+/**
+ *  Start a transfer on the SPI interface with source data from EEPROM
  *  @param bytes_out The number of bytes to be transmitted
  *  @param address An EEPROM pointer to the data to be sent
  *  @param bytes_in The number of response bytes to store

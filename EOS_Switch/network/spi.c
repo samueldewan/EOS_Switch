@@ -13,6 +13,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+#include <avr/pgmspace.h>
 #include <util/atomic.h>
 
 struct spi_transfer {
@@ -143,6 +144,20 @@ void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
     
     for (int i = 0; i < bytes_out; i++) {
         spi_write_byte(out_buffer[i]);
+    }
+    
+    spi_service();
+}
+
+void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in)
+{
+    uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
+    
+    spi_transfers[transfer_addr].bytes_in_left = (bytes_in == 0) ? -1 : bytes_in;
+    spi_transfers[transfer_addr].bytes_out_left = bytes_out;
+    
+    for (int i = 0; i < bytes_out; i++) {
+        spi_write_byte(pgm_read_byte(&out_buffer[i]));
     }
     
     spi_service();
