@@ -17,12 +17,12 @@
 
 struct spi_transfer {
     int16_t bytes_out_left;
-    int16_t bytes_in_left;
+    int8_t bytes_in_left;
 };
 
 // MARK: Macros
 #define SPI_IN_BUFFER_LENGTH    64
-#define SPI_OUT_BUFFER_LENGTH   256
+#define SPI_OUT_BUFFER_LENGTH   255
 
 #define SPI_CONCURRENT_TRANSFERS 4
 
@@ -39,11 +39,11 @@ static uint8_t spi_current_transfer;
 static spi_transfer_T spi_transfers[SPI_CONCURRENT_TRANSFERS];
 
 // MARK: Static functions
-static inline void circular_increment(uint8_t *byte, uint8_t max) {
+static inline void circular_increment(volatile uint8_t *byte, uint8_t max) {
     *byte = ((*byte + 1) > max) ? 0 : *byte + 1;
 }
 
-static inline void increment_buffer_insert (uint8_t* insert_p, uint8_t *withdraw_p, uint8_t buffer_length)
+static inline void increment_buffer_insert (volatile uint8_t* insert_p, volatile uint8_t *withdraw_p, uint8_t buffer_length)
 {
     circular_increment(insert_p, buffer_length);
     if (*insert_p == *withdraw_p) {
@@ -51,7 +51,7 @@ static inline void increment_buffer_insert (uint8_t* insert_p, uint8_t *withdraw
     }
 }
 
-static inline void increment_buffer_withdraw (uint8_t *withdraw_p, uint8_t buffer_length)
+static inline void increment_buffer_withdraw (volatile uint8_t *withdraw_p, uint8_t buffer_length)
 {
     circular_increment(withdraw_p, buffer_length);
 }
@@ -65,7 +65,7 @@ static void spi_write_byte (char data)
 
 static void spi_write_byte_from_eeprom (uint16_t address)
 {
-    spi_out_buffer[out_buffer_insert_p] = eeprom_read_byte(data);
+    spi_out_buffer[out_buffer_insert_p] = eeprom_read_byte(address);
     increment_buffer_insert(&out_buffer_insert_p, &out_buffer_withdraw_p, SPI_OUT_BUFFER_LENGTH);
     spi_service();
 }
@@ -184,7 +184,7 @@ void spi_service (void)
         if ((!(flags & (1<<FLAG_SPI_LOCK))) && (out_buffer_withdraw_p != out_buffer_insert_p)) {
             flags |= (1<<FLAG_SPI_LOCK);
             SPI_PORT &= !(1<<SPI_SS_NUM);
-            SPDR = serial_out_buffer[out_buffer_withdraw_p];
+            SPDR = spi_out_buffer[out_buffer_withdraw_p];
             spi_transfers[spi_current_transfer].bytes_out_left--;
             increment_buffer_withdraw(&out_buffer_withdraw_p, SPI_OUT_BUFFER_LENGTH);
         }
@@ -194,7 +194,7 @@ void spi_service (void)
 // MARK: Interupts
 ISR (SPI_STC_vect)
 {
-    uint8_t status = SPSR;
+    //uint8_t status = SPSR;
     char data = SPDR;
     
     if (spi_transfers[spi_current_transfer].bytes_out_left > 0) {
@@ -205,7 +205,7 @@ ISR (SPI_STC_vect)
         // TX done, send first dummy byte
         SPDR = 0xFF;
         spi_transfers[spi_current_transfer].bytes_out_left--;
-    } else (spi_transfers[spi_current_transfer].bytes_out_left == -1) {
+    } else if (spi_transfers[spi_current_transfer].bytes_out_left == -1) {
         // No bytes left to be transmitted
         if (spi_transfers[spi_current_transfer].bytes_in_left == -1) {
             // No bytes to be recieved
@@ -231,7 +231,7 @@ ISR (SPI_STC_vect)
             } else {
                 flags &= !(1<<FLAG_SPI_LOCK);
             }
-        } else (spi_transfers[spi_current_transfer].bytes_in_left > 0) {
+        } else if (spi_transfers[spi_current_transfer].bytes_in_left > 0) {
             // Recive byte and send next dummy byte
             spi_in_append_byte(data);
             spi_transfers[spi_current_transfer].bytes_in_left--;
