@@ -9,8 +9,6 @@
 #include "serial.h"
 #include "network.h"
 
-#include "libethernet/libethernet.h"
-
 //MARK: Constants
 
 // MARK: Function prototypes
@@ -145,7 +143,7 @@ int main(void)
     flags |= (1<<FLAG_STAT_ONE_ON);
     
     if (!init_network()) {
-        flags |= (1<<FLAG_ONLINE);
+        //flags |= (1<<FLAG_ONLINE);
     }
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);

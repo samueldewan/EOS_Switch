@@ -1,13 +1,13 @@
 //
 //  calibration.h
-//  DMX-ISPLIT
+//  EOS_Switch
 //
 //  Created by Samuel Dewan on 2016-10-09.
 //  Copyright © 2016 Samuel Dewan. All rights reserved.
 //
 
-#ifndef debounce_h
-#define debounce_h
+#ifndef calibration_h
+#define calibration_h
 
 #include "global.h"
 #include "pindefinitions.h"
@@ -27,4 +27,4 @@ void init_calibration (void);
  */
 void calibration_service (void);
 
-#endif /* debounce_h */
+#endif /* calibration_h */

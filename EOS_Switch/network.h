@@ -11,8 +11,6 @@
 
 #include "global.h"
 
-#endif /* network_h */
-
 /**
  *  Initilize the network interface
  *  @return 0 If init was sucessfull, -1 otherwise
@@ -58,3 +56,5 @@ extern uint32_t network_get_netmask(void);
  *  Network actions to be performed in each main loop
  */
 extern void network_service (void);
+
+#endif /* network_h */

@@ -1,14 +1,79 @@
 //
-//  calibration.h
-//  DMX-ISPLIT
+//  spi.h
+//  EOS_Switch
 //
-//  Created by Samuel Dewan on 2016-10-09.
-//  Copyright © 2016 Samuel Dewan. All rights reserved.
+//  Created by Samuel Dewan on 2017-02-19.
+//  Copyright © 2017 Samuel Dewan. All rights reserved.
 //
 
-#ifndef debounce_h
-#define debounce_h
+#ifndef spi_h
+#define spi_h
+
+#include "global.h"
+
+typedef struct spi_transfer spi_transfer_T;
 
 
+/**
+ *  Initialize the SPI interface
+ */
+extern void init_spi(void);
 
-#endif /* debounce_h */
+/**
+ *  Determin how much space is avaliable in the input buffer
+ *  @return The number of free bytes in the SPI input buffer
+ */
+extern uint8_t spi_in_bytes_free (void);
+
+/*  Determin how many bytes are avaliable to be read from the SPI input buffer
+ *  @return The number bytes that are avaliable to be read from the SPI input buffer
+ */
+extern uint8_t spi_in_bytes_avaliable (void);
+
+/**
+ *  Determin how much space is avaliable in the output buffer
+ *  @return The number of free bytes in the SPI output buffer
+ */
+extern uint8_t spi_out_bytes_free (void);
+
+/**
+ *  Determin if there is an SPI transfer slot free
+ *  @return 0 if there is no free slot, 1 if a slot is free
+ */
+extern uint8_t spi_transfer_avaliable (void);
+
+/**
+ *  Start a transfer on the SPI interface
+ *  @param bytes_out The number of bytes to be transmitted
+ *  @param out_buffer A pointer the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
+
+/**
+ *  Start a transfer on the SPI interface with source data in EEPROM
+ *  @param bytes_out The number of bytes to be transmitted
+ *  @param address An EEPROM pointer to the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer_from_eeprom (uint8_t bytes_out, uint16_t address, uint8_t bytes_in);
+
+/**
+ *  Get a byte from the input buffer
+ *  @return The oldest byte from the input buffer
+ */
+extern char spi_read_byte (void);
+
+/**
+ *  Read a block of bytes from the input buffer
+ *  @param buffer The buffer in which to store the data from the buffer
+ *  @param length The numberof bytes to read from the buffer
+ */
+void spi_read_block (char* buffer, int length);
+
+/**
+ *  Service to be run in each main loop
+ */
+extern void spi_service (void);
+
+#endif /* spi_h */

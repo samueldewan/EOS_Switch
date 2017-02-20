@@ -55,11 +55,22 @@
 //#define OSCCAL_INDICATOR_TWO_PORT   STAT_TWO_PORT
 //#define OSCCAL_INDICATOR_TWO_NUM    STAT_TWO_NUM
 
+// MARK: SPI
+#define SPI_DDR         DDRB
+#define SPI_PORT        PORTB
+#define SPI_PIN         PINB
+
+#define SPI_SCK_NUM     PINB5
+#define SPI_MISO_NUM    PINB4
+#define SPI_MOSI_NUM    PINB3
+#define SPI_SS_NUM      PINB2
+
 
 // MARK: Flags
 #define FLAG_OSCAL_MODE         7
 #define FLAG_SERIAL_LOOPBACK    6
 #define FLAG_SERIAL_TX_LOCK     5
+#define FLAG_SPI_LOCK           4
 #define FLAG_STAT_ONE_ON        1
 #define FLAG_ONLINE             0
 
