@@ -25,13 +25,6 @@ static const uint8_t bank_0[2] PROGMEM = {SPI_BFS(0x1F), 0x00}; // switch to con
 static const uint8_t set_EDMASTL[2] PROGMEM = {SPI_WCR(0x14), 0x0F}; // set checksum start address
 static const uint8_t set_EDMANDL[2] PROGMEM = {SPI_WCR(0x14), 0x22}; // set checksum end address
 
-static uint8_t set_mac_1[2] = {SPI_WCR(0x04), 0x00} // write byte 1 of the MAC address
-static uint8_t set_mac_2[2] = {SPI_WCR(0x05), 0x00} // write byte 2 of the MAC address
-static uint8_t set_mac_3[2] = {SPI_WCR(0x02), 0x00} // write byte 3 of the MAC address
-static uint8_t set_mac_4[2] = {SPI_WCR(0x03), 0x00} // write byte 4 of the MAC address
-static uint8_t set_mac_5[2] = {SPI_WCR(0x01), 0x00} // write byte 5 of the MAC address
-static uint8_t set_mac_6[2] = {SPI_WCR(0x02), 0x00} // write byte 6 of the MAC address
-
 static const uint8_t packet_1[8] PROGMEM = {SPI_WBM, // Chunk 1 of the packet
     0x00, // ENC28J60 control byte
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF // Destination MAC Address
@@ -84,12 +77,6 @@ void init_enc28j60(void)
     }
 
     eeprom_read_block(adresses + 1, SETTING_MAC_ADDR, 6);
-    set_mac_1[1] = addresses[1];
-    set_mac_2[1] = addresses[2];
-    set_mac_3[1] = addresses[3];
-    set_mac_4[1] = addresses[4];
-    set_mac_5[1] = addresses[5];
-    set_mac_6[1] = addresses[6];
 
     spi_start_transfer_P(1, read_ESTAT, 1);
 }
@@ -151,37 +138,37 @@ void enc28j60_service(void)
             break;
 	case STATE_BANK_3:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_1, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x04), 1, addresses[1], 0);
                 enc28j60_state = STATE_MADDR_1_SET;
             }
             break;
 	case STATE_MADDR_1_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_2, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x05), 1, addresses[2], 0);
                 enc28j60_state = STATE_MADDR_2_SET;
             }
             break;
 	case STATE_MADDR_2_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_3, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x02), 1, addresses[3], 0);
                 enc28j60_state = STATE_MADDR_3_SET;
             }
             break;
 	case STATE_MADDR_3_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_4, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x03), 1, addresses[4], 0);
                 enc28j60_state = STATE_MADDR_4_SET;
             }
             break;
 	case STATE_MADDR_4_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_5, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x00), 1, addresses[5], 0);
                 enc28j60_state = STATE_MADDR_5_SET;
             }
             break;
 	case STATE_MADDR_5_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer(2, set_mac_6, 0);
+                spi_start_transfer_cmd(SPI_WCR(0x01), 1, addresses[6], 0);
                 enc28j60_state = STATE_MADDR_6_SET;
             }
             break;
