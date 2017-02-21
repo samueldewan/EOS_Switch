@@ -7,7 +7,8 @@
 #include "global.h"
 #include "pindefinitions.h"
 #include "serial.h"
-#include "network.h"
+#include "network/enc28j60.h"
+#include "network/udp.h"
 
 //MARK: Constants
 
@@ -142,9 +143,7 @@ int main(void)
     stat_one_period = 500;
     flags |= (1<<FLAG_STAT_ONE_ON);
     
-    if (!init_network()) {
-        //flags |= (1<<FLAG_ONLINE);
-    }
+    init_enc28j60()
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
 //    uint8_t mac[] = {0xDD, 0x66, 0x0C, 0x0A, 0x2A, 0x79};
@@ -172,8 +171,8 @@ int main(void)
 
     for (;;) {
         main_loop();
-	}
-	return 0; // never reached
+    }
+    return 0; // never reached
 }
 
 static const char menu_cmd_help[] PROGMEM =         "help";
@@ -286,9 +285,8 @@ static void main_loop ()
     }
     
     // Network
-    if (flags & (1<<FLAG_ONLINE)) {
-        network_service();
-    }
+    enc28j60_service();
+    udp_service();
 }
 
 static inline void print_prompt(void) {
