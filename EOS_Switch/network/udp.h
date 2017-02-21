@@ -25,7 +25,7 @@ extern int udp_eeprom_send(uint16_t buffer, uint8_t length);
  * @param length The length of the buffer.
  * @return 0 on success, 1 on error.
  */
-extern int udp_buffer_send(const char *buffer, uint8_t length);
+extern int udp_buffer_send(const uint8_t *buffer, uint8_t length);
 
 /**
  * Return whether the UDP system is ready to send a new packet. This can also be

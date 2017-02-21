@@ -140,10 +140,9 @@ int main(void)
 
     sei();
     
-    stat_one_period = 500;
     flags |= (1<<FLAG_STAT_ONE_ON);
     
-    init_enc28j60()
+    init_enc28j60();
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
 //    uint8_t mac[] = {0xDD, 0x66, 0x0C, 0x0A, 0x2A, 0x79};
@@ -154,7 +153,7 @@ int main(void)
 //    eeprom_update_dword(SETTING_NTP_ADDR, MAKE_IP(132,246,11,227));
 //    eeprom_update_dword(SETTING_NETMASK, MAKE_IP(255,255,255,0));
 //    eeprom_update_byte(SETTING_GMT_OFFSET, 2);
-    eeprom_update_byte(SETTING_DCHP, 0);
+//    eeprom_update_byte(SETTING_DCHP, 0);
 //    eeprom_update_dword(SETTING_TARGET_IP, MAKE_IP(192, 168, 1, 100));
 //    eeprom_update_word(SETTING_TARGET_PORT, 56789);
 //
@@ -245,7 +244,10 @@ static void main_loop ()
                     menu_status = SET;
                     process_set(menu_buffer + 3);
                 } else if (!strncasecmp_P(menu_buffer, menu_cmd_testnet, 3)) {
-                    network_send_string(menu_buffer + 8);
+                    while (!udp_ready()) {
+                        // TODO: Remove busy-waiting
+                    }
+                    udp_buffer_send((uint8_t*)(menu_buffer + 8), strlen(menu_buffer) - 8);
                 } else {
                     serial_put_string_P(menu_unkown_cmd_prt1);
                     serial_put_byte('"');
@@ -287,6 +289,10 @@ static void main_loop ()
     // Network
     enc28j60_service();
     udp_service();
+    
+    if (enc28j60_ready()) {
+        stat_one_period = 500;
+    }
 }
 
 static inline void print_prompt(void) {
@@ -415,13 +421,16 @@ static inline void print_dhcp(void)
 {
     char tmp[4];
     serial_put_string_P(menu_ipinfo_ip_string);
-    print_addr(network_get_ip_addr(), '.', 4, 10, tmp);
+    //print_addr(network_get_ip_addr(), '.', 4, 10, tmp);
+    print_addr(0, '.', 4, 10, tmp);
     
     serial_put_string_P(menu_ipinfo_router_string);
-    print_addr(network_get_router_addr(), '.', 4, 10, tmp);
+    //print_addr(network_get_router_addr(), '.', 4, 10, tmp);
+    print_addr(0, '.', 4, 10, tmp);
     
     serial_put_string_P(menu_ipinfo_netmask_string);
-    print_addr(network_get_netmask(), '.', 4, 10, tmp);
+    //print_addr(network_get_netmask(), '.', 4, 10, tmp);
+    print_addr(0, '.', 4, 10, tmp);
 }
 
 static const char menu_set_key_i_ip[] PROGMEM =       " ip.ip";

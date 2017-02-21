@@ -28,7 +28,7 @@ static const uint8_t set_EDMANDL[2] PROGMEM = {SPI_WCR(0x14), 0x22}; // set chec
 static const uint8_t packet_1[8] PROGMEM = {SPI_WBM, // Chunk 1 of the packet
     0x00, // ENC28J60 control byte
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF // Destination MAC Address
-}
+};
 static const uint8_t packet_2[19] PROGMEM = {SPI_WBM, // Chunk 2 of the packet
     0x08, 0x00, // Ethernet packet type
     0x45, // IP Version && IHL
@@ -40,8 +40,8 @@ static const uint8_t packet_2[19] PROGMEM = {SPI_WBM, // Chunk 2 of the packet
     0x11, // Protocol
     0x00, 0x00, // Placeholder for header checksum
     0x00, 0x00, 0x00, 0x00 // Source address
-}
-static uint8_t addresses[7] = {SPI_WBM, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} // buffer to write addresses from
+};
+static uint8_t addresses[7] = {SPI_WBM, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // buffer to write addresses from
 
 static enum {
     STATE_BEGIN,
@@ -77,7 +77,7 @@ void init_enc28j60(void)
         return;
     }
 
-    eeprom_read_block(adresses + 1, SETTING_MAC_ADDR, 6);
+    eeprom_read_block(addresses + 1, SETTING_MAC_ADDR, 6);
 
     spi_start_transfer_P(1, read_ESTAT, 1);
 }
@@ -87,7 +87,7 @@ void enc28j60_service(void)
     uint16_t port;
     switch (enc28j60_state) {
         case STATE_BEGIN:
-            if (spi_in_bytes_availabe() > 0) {
+            if (spi_transfer_available() > 0) {
                 if (spi_read_byte() & 1) {
                     enc28j60_state = STATE_CLOCK_STABILIZED;
                 } else {
@@ -139,37 +139,37 @@ void enc28j60_service(void)
             break;
 	case STATE_BANK_3:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x04), 1, addresses[1], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x04), 1, &addresses[1], 0);
                 enc28j60_state = STATE_MADDR_1_SET;
             }
             break;
 	case STATE_MADDR_1_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x05), 1, addresses[2], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x05), 1, &addresses[2], 0);
                 enc28j60_state = STATE_MADDR_2_SET;
             }
             break;
 	case STATE_MADDR_2_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x02), 1, addresses[3], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x02), 1, &addresses[3], 0);
                 enc28j60_state = STATE_MADDR_3_SET;
             }
             break;
 	case STATE_MADDR_3_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x03), 1, addresses[4], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x03), 1, &addresses[4], 0);
                 enc28j60_state = STATE_MADDR_4_SET;
             }
             break;
 	case STATE_MADDR_4_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x00), 1, addresses[5], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x00), 1, &addresses[5], 0);
                 enc28j60_state = STATE_MADDR_5_SET;
             }
             break;
 	case STATE_MADDR_5_SET:
             if (spi_transfer_available()) {
-                spi_start_transfer_cmd(SPI_WCR(0x01), 1, addresses[6], 0);
+                spi_start_transfer_with_cmd(SPI_WCR(0x01), 1, &addresses[6], 0);
                 enc28j60_state = STATE_MADDR_6_SET;
             }
             break;
@@ -193,7 +193,7 @@ void enc28j60_service(void)
             break;
 	case STATE_PACKET_2_WRITTEN:
             if (spi_transfer_available()) {
-                eeprom_read_block(adresses + 1, SETTING_TARGET_IP, 4);
+                eeprom_read_block(addresses + 1, SETTING_TARGET_IP, 4);
                 spi_start_transfer(5, addresses, 0);
                 enc28j60_state = STATE_DEST_IP_WRITTEN;
             }

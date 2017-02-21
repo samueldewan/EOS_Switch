@@ -110,7 +110,7 @@ uint8_t spi_in_bytes_free (void)
     }
 }
 
-uint8_t spi_in_bytes_avaliable (void)
+uint8_t spi_in_bytes_available (void)
 {
     return SPI_IN_BUFFER_LENGTH - spi_in_bytes_free();
 }
@@ -124,7 +124,7 @@ uint8_t spi_out_bytes_free (void)
     }
 }
 
-uint8_t spi_transfer_avaliable (void)
+uint8_t spi_transfer_available (void)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
     
@@ -135,7 +135,7 @@ uint8_t spi_transfer_avaliable (void)
     }
 }
 
-void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
+void spi_start_transfer (uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
     
@@ -149,7 +149,7 @@ void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
     spi_service();
 }
 
-void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
+void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
     
@@ -164,7 +164,7 @@ void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* out_buff
     spi_service();
 }
 
-void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in)
+void spi_start_transfer_P (uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
     
@@ -178,7 +178,7 @@ void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t by
     spi_service();
 }
 
-void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in)
+void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
     
