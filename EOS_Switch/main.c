@@ -292,6 +292,7 @@ static void main_loop ()
     
     if (enc28j60_ready()) {
         stat_one_period = 500;
+        flags |= (1<<FLAG_ONLINE);
     }
 }
 
