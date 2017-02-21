@@ -51,12 +51,30 @@ extern uint8_t spi_transfer_avaliable (void);
 extern void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
 
 /**
- *  Start a transfer on the SPI interface with source data from programspace
+ *  Start a transfer on the SPI interface, prefixed by a command byte
+ *  @param cmd The command byte to be prefixed to the transfer
+ *  @param bytes_out The number of bytes to be transmitted (not including command byte)
+ *  @param out_buffer A pointer the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
+
+/**
+ *  Start a transfer on the SPI interface with source data from program space
  *  @param bytes_out The number of bytes to be transmitted
- *  @param out_buffer A programspace pointer the data to be sent
+ *  @param out_buffer A program space pointer the data to be sent
  *  @param bytes_in The number of response bytes to store
  */
 extern void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in);
+
+/**
+ *  Start a transfer on the SPI interface with source data from program space, prefixed by a command byte
+ *  @param cmd The command byte to be prefixed to the transfer
+ *  @param bytes_out The number of bytes to be transmitted (not including command byte)
+ *  @param out_buffer A program space pointer the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in);
 
 /**
  *  Start a transfer on the SPI interface with source data from EEPROM
@@ -65,6 +83,15 @@ extern void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uin
  *  @param bytes_in The number of response bytes to store
  */
 extern void spi_start_transfer_from_eeprom (uint8_t bytes_out, uint16_t address, uint8_t bytes_in);
+
+/**
+ *  Start a transfer on the SPI interface with source data from EEPROM, prefixed by a command byte
+ *  @param cmd The command byte to be prefixed to the transfer
+ *  @param bytes_out The number of bytes to be transmitted (not including command byte)
+ *  @param address An EEPROM pointer to the data to be sent
+ *  @param bytes_in The number of response bytes to store
+ */
+extern void spi_start_transfer_with_cmd_from_eeprom (uint8_t cmd, uint8_t bytes_out, uint16_t address, uint8_t bytes_in);
 
 /**
  *  Get a byte from the input buffer

@@ -149,6 +149,21 @@ void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
     spi_service();
 }
 
+void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* out_buffer, uint8_t bytes_in)
+{
+    uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
+    
+    spi_transfers[transfer_addr].bytes_in_left = (bytes_in == 0) ? -1 : bytes_in;
+    spi_transfers[transfer_addr].bytes_out_left = bytes_out + 1;
+    
+    spi_write_byte(cmd);
+    for (int i = 0; i < bytes_out; i++) {
+        spi_write_byte(out_buffer[i]);
+    }
+    
+    spi_service();
+}
+
 void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
@@ -163,6 +178,21 @@ void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t by
     spi_service();
 }
 
+void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in)
+{
+    uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
+    
+    spi_transfers[transfer_addr].bytes_in_left = (bytes_in == 0) ? -1 : bytes_in;
+    spi_transfers[transfer_addr].bytes_out_left = bytes_out + 1;
+    
+    spi_write_byte(cmd);
+    for (int i = 0; i < bytes_out; i++) {
+        spi_write_byte(pgm_read_byte(&out_buffer[i]));
+    }
+    
+    spi_service();
+}
+
 void spi_start_transfer_from_eeprom (uint8_t bytes_out, uint16_t address, uint8_t bytes_in)
 {
     uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
@@ -170,6 +200,21 @@ void spi_start_transfer_from_eeprom (uint8_t bytes_out, uint16_t address, uint8_
     spi_transfers[transfer_addr].bytes_in_left = (bytes_in == 0) ? -1 : bytes_in;
     spi_transfers[transfer_addr].bytes_out_left = bytes_out;
     
+    for (int i = 0; i < bytes_out; i++) {
+        spi_write_byte_from_eeprom(address + i);
+    }
+    
+    spi_service();
+}
+
+void spi_start_transfer_with_cmd_from_eeprom (uint8_t cmd, uint8_t bytes_out, uint16_t address, uint8_t bytes_in)
+{
+    uint8_t transfer_addr = ((spi_current_transfer + 1) >= SPI_CONCURRENT_TRANSFERS) ? 0 : spi_current_transfer + 1;
+    
+    spi_transfers[transfer_addr].bytes_in_left = (bytes_in == 0) ? -1 : bytes_in;
+    spi_transfers[transfer_addr].bytes_out_left = bytes_out + 1;
+    
+    spi_write_byte(cmd);
     for (int i = 0; i < bytes_out; i++) {
         spi_write_byte_from_eeprom(address + i);
     }
