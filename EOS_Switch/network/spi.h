@@ -28,7 +28,7 @@ extern uint8_t spi_in_bytes_free (void);
 /*  Determin how many bytes are avaliable to be read from the SPI input buffer
  *  @return The number bytes that are avaliable to be read from the SPI input buffer
  */
-extern uint8_t spi_in_bytes_avaliable (void);
+extern uint8_t spi_in_bytes_available (void);
 
 /**
  *  Determin how much space is avaliable in the output buffer
@@ -40,7 +40,7 @@ extern uint8_t spi_out_bytes_free (void);
  *  Determin if there is an SPI transfer slot free
  *  @return 0 if there is no free slot, 1 if a slot is free
  */
-extern uint8_t spi_transfer_avaliable (void);
+extern uint8_t spi_transfer_available (void);
 
 /**
  *  Start a transfer on the SPI interface
@@ -48,7 +48,7 @@ extern uint8_t spi_transfer_avaliable (void);
  *  @param out_buffer A pointer the data to be sent
  *  @param bytes_in The number of response bytes to store
  */
-extern void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
+extern void spi_start_transfer (uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in);
 
 /**
  *  Start a transfer on the SPI interface, prefixed by a command byte
@@ -57,7 +57,7 @@ extern void spi_start_transfer (uint8_t bytes_out, char* out_buffer, uint8_t byt
  *  @param out_buffer A pointer the data to be sent
  *  @param bytes_in The number of response bytes to store
  */
-extern void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* out_buffer, uint8_t bytes_in);
+extern void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in);
 
 /**
  *  Start a transfer on the SPI interface with source data from program space
@@ -65,7 +65,7 @@ extern void spi_start_transfer_with_cmd (uint8_t cmd, uint8_t bytes_out, char* o
  *  @param out_buffer A program space pointer the data to be sent
  *  @param bytes_in The number of response bytes to store
  */
-extern void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in);
+extern void spi_start_transfer_P (uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in);
 
 /**
  *  Start a transfer on the SPI interface with source data from program space, prefixed by a command byte
@@ -74,7 +74,7 @@ extern void spi_start_transfer_P (uint8_t bytes_out, const char* out_buffer, uin
  *  @param out_buffer A program space pointer the data to be sent
  *  @param bytes_in The number of response bytes to store
  */
-extern void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const char* out_buffer, uint8_t bytes_in);
+extern void spi_start_transfer_with_cmd_P (uint8_t cmd, uint8_t bytes_out, const uint8_t* out_buffer, uint8_t bytes_in);
 
 /**
  *  Start a transfer on the SPI interface with source data from EEPROM

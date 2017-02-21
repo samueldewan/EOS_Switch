@@ -7,17 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BC00628B1E439ECB004F2CE6 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = BC0062891E439ECB004F2CE6 /* network.c */; };
 		BC3053CD1E4E8EAF0007CDC8 /* serial.c in Sources */ = {isa = PBXBuildFile; fileRef = BC3053CC1E4E8EAF0007CDC8 /* serial.c */; };
 		BC50CE721DDE3076002173F4 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE711DDE3076002173F4 /* main.c */; };
 		BC50CE751DDE3076002173F4 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE741DDE3076002173F4 /* Makefile */; };
 		BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */ = {isa = PBXBuildFile; fileRef = BC50CE8C1DDE3F8F002173F4 /* calibration.c */; };
 		BCCE03641E5A2E6400305093 /* spi.c in Sources */ = {isa = PBXBuildFile; fileRef = BCCE03631E5A2E6400305093 /* spi.c */; };
+		BCCE03691E5CDEB800305093 /* enc28j60.c in Sources */ = {isa = PBXBuildFile; fileRef = BCCE03651E5CDEB800305093 /* enc28j60.c */; };
+		BCCE036A1E5CDEB800305093 /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = BCCE03671E5CDEB800305093 /* udp.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BC0062891E439ECB004F2CE6 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
-		BC00628A1E439ECB004F2CE6 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = network.h; sourceTree = "<group>"; };
 		BC3053CB1E4E8EAF0007CDC8 /* serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serial.h; sourceTree = "<group>"; };
 		BC3053CC1E4E8EAF0007CDC8 /* serial.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = serial.c; sourceTree = "<group>"; };
 		BC50CE6E1DDE3076002173F4 /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -29,6 +28,10 @@
 		BC50CE8C1DDE3F8F002173F4 /* calibration.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = calibration.c; sourceTree = "<group>"; };
 		BCCE03621E5A2E5000305093 /* spi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spi.h; sourceTree = "<group>"; };
 		BCCE03631E5A2E6400305093 /* spi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = spi.c; sourceTree = "<group>"; };
+		BCCE03651E5CDEB800305093 /* enc28j60.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = enc28j60.c; sourceTree = "<group>"; };
+		BCCE03661E5CDEB800305093 /* enc28j60.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enc28j60.h; sourceTree = "<group>"; };
+		BCCE03671E5CDEB800305093 /* udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = udp.c; sourceTree = "<group>"; };
+		BCCE03681E5CDEB800305093 /* udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = udp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -56,8 +59,6 @@
 				BC50CE711DDE3076002173F4 /* main.c */,
 				BC3053CB1E4E8EAF0007CDC8 /* serial.h */,
 				BC3053CC1E4E8EAF0007CDC8 /* serial.c */,
-				BC00628A1E439ECB004F2CE6 /* network.h */,
-				BC0062891E439ECB004F2CE6 /* network.c */,
 				BC50CE881DDE3B13002173F4 /* calibration.h */,
 				BC50CE8C1DDE3F8F002173F4 /* calibration.c */,
 				BCCE03611E5A2E5000305093 /* network */,
@@ -79,6 +80,10 @@
 			children = (
 				BCCE03621E5A2E5000305093 /* spi.h */,
 				BCCE03631E5A2E6400305093 /* spi.c */,
+				BCCE03661E5CDEB800305093 /* enc28j60.h */,
+				BCCE03651E5CDEB800305093 /* enc28j60.c */,
+				BCCE03681E5CDEB800305093 /* udp.h */,
+				BCCE03671E5CDEB800305093 /* udp.c */,
 			);
 			path = network;
 			sourceTree = "<group>";
@@ -213,12 +218,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCCE036A1E5CDEB800305093 /* udp.c in Sources */,
 				BCCE03641E5A2E6400305093 /* spi.c in Sources */,
-				BC00628B1E439ECB004F2CE6 /* network.c in Sources */,
 				BC3053CD1E4E8EAF0007CDC8 /* serial.c in Sources */,
 				BC50CE751DDE3076002173F4 /* Makefile in Sources */,
 				BC50CE721DDE3076002173F4 /* main.c in Sources */,
 				BC50CE8D1DDE3F8F002173F4 /* calibration.c in Sources */,
+				BCCE03691E5CDEB800305093 /* enc28j60.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -54,10 +54,10 @@ static uint8_t set_ETXNDH[2] = {SPI_WCR(0x07), 0x00};
 #define STATE_SENT 22
 static uint8_t udp_state = STATE_READY;
 
-int udp_buffer_send(const char *buffer, uint8_t length)
+int udp_buffer_send(const uint8_t *buffer, uint8_t length)
 {
     uint16_t tmp_length;
-
+    
     if (udp_state != STATE_READY) {
         return 1;
     }
@@ -71,17 +71,17 @@ int udp_buffer_send(const char *buffer, uint8_t length)
     tmp_length += 13;
     set_ETXNDH[1] = (uint8_t) (tmp_length >> 8);
     set_ETXNDL[1] = (uint8_t) tmp_length;
-
+    
     spi_start_transfer_with_cmd(SPI_WBM, length, buffer, 0);
     udp_state = STATE_BEGIN;
-
+    
     return 0;
 }
 
-int udp_eeprom_send(uint16_t buffer, uint8_t length);
+int udp_eeprom_send(uint16_t buffer, uint8_t length)
 {
     uint16_t tmp_length;
-
+    
     if (udp_state != STATE_READY) {
         return 1;
     }
@@ -92,10 +92,10 @@ int udp_eeprom_send(uint16_t buffer, uint8_t length);
     tmp_length += 20;
     ip_length[1] = (uint8_t) (tmp_length >> 8);
     ip_length[2] = (uint8_t) tmp_length;
-
-    spi_start_transfer_from_eeprom_with_cmd(SPI_WBM, length, buffer, 0);
+    
+    spi_start_transfer_with_cmd_from_eeprom(SPI_WBM, length, buffer, 0);
     udp_state = STATE_BEGIN;
-
+    
     return 0;
 }
 
@@ -106,47 +106,47 @@ void udp_service(void)
         case STATE_BEGIN:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, move_ip_length_l, 0);
-		udp_state = STATE_IP_LENGTH_PART;
+                udp_state = STATE_IP_LENGTH_PART;
             }
             break;
         case STATE_IP_LENGTH_PART:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, move_ip_length_h, 0);
-		udp_state = STATE_IP_LENGTH_POS;
+                udp_state = STATE_IP_LENGTH_POS;
             }
             break;
         case STATE_IP_LENGTH_POS:
             if (spi_transfer_available()) {
                 ip_length[4]++;
-		if (ip_length[4] == 0) {
+                if (ip_length[4] == 0) {
                     ip_length[3]++;
                 }
                 spi_start_transfer(5, ip_length, 0);
-		udp_state = STATE_IP_LENGTH_WRITTEN;
+                udp_state = STATE_IP_LENGTH_WRITTEN;
             }
             break;
         case STATE_IP_LENGTH_WRITTEN:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, move_ip_csum_l, 0);
-		udp_state = STATE_IP_CSUM_POS;
+                udp_state = STATE_IP_CSUM_POS;
             }
             break;
         case STATE_IP_CSUM_POS:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(3, clear_checksum, 0);
-		udp_state = STATE_IP_CSUM_CLEAR;
+                udp_state = STATE_IP_CSUM_CLEAR;
             }
             break;
         case STATE_IP_CSUM_CLEAR:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, generate_checksum, 0);
-		udp_state = STATE_CSUM_CALCULATING;
+                udp_state = STATE_CSUM_CALCULATING;
             }
             break;
         case STATE_CSUM_CALCULATING:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(1, read_ECON1, 1);
-		udp_state = STATE_CSUM_CALCULATING_2;
+                udp_state = STATE_CSUM_CALCULATING_2;
             }
             break;
         case STATE_CSUM_CALCULATING_2:
@@ -161,79 +161,79 @@ void udp_service(void)
         case STATE_CSUM_CALCULATED:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(1, read_EDMACSL, 1);
-		udp_state = STATE_CSUM_READ_1;
+                udp_state = STATE_CSUM_READ_1;
             }
             break;
         case STATE_CSUM_READ_1:
             if (spi_in_bytes_available() > 1) {
                 ip_csum[2] = spi_read_byte();
-		udp_state = STATE_CSUM_READ_2;
+                udp_state = STATE_CSUM_READ_2;
             }
             break;
         case STATE_CSUM_READ_2:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(1, read_EDMACSH, 1);
-		udp_state = STATE_CSUM_READ_3;
+                udp_state = STATE_CSUM_READ_3;
             }
             break;
         case STATE_CSUM_READ_3:
             if (spi_in_bytes_available() > 1) {
                 ip_csum[1] = spi_read_byte();
-		udp_state = STATE_CSUM_READ;
+                udp_state = STATE_CSUM_READ;
             }
             break;
         case STATE_CSUM_READ:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, move_ip_csum_l, 0);
-		udp_state = STATE_IP_CSUM_POS_2;
+                udp_state = STATE_IP_CSUM_POS_2;
             }
             break;
         case STATE_IP_CSUM_POS_2:
             if (spi_transfer_available()) {
                 spi_start_transfer(3, ip_csum, 0);
-		udp_state = STATE_IP_CSUM_WRITTEN;
+                udp_state = STATE_IP_CSUM_WRITTEN;
             }
             break;
         case STATE_IP_CSUM_WRITTEN:
             if (spi_transfer_available()) {
                 spi_start_transfer(2, move_udp_length_l, 0);
-		udp_state = STATE_UDP_LENGTH_POS;
+                udp_state = STATE_UDP_LENGTH_POS;
             }
             break;
         case STATE_UDP_LENGTH_POS:
             if (spi_transfer_available()) {
                 spi_start_transfer(3, udp_length, 0);
-		udp_state = STATE_UDP_LENGTH_WRITTEN;
+                udp_state = STATE_UDP_LENGTH_WRITTEN;
             }
             break;
         case STATE_UDP_LENGTH_WRITTEN:
             if (spi_transfer_available()) {
                 spi_start_transfer(2, set_ETXNDL, 0);
-		udp_state = STATE_ETXNDL_SET;
+                udp_state = STATE_ETXNDL_SET;
             }
             break;
         case STATE_ETXNDL_SET:
             if (spi_transfer_available()) {
                 spi_start_transfer(2, set_ETXNDH, 0);
-		udp_state = STATE_ETXNDH_SET;
+                udp_state = STATE_ETXNDH_SET;
             }
             break;
         case STATE_ETXNDH_SET:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(2, transmit, 0);
-		udp_state = STATE_TRANSMITTING;
+                udp_state = STATE_TRANSMITTING;
             }
             break;
         case STATE_TRANSMITTING:
             if (spi_transfer_available()) {
                 spi_start_transfer_P(1, read_ECON1, 1);
-		udp_state = STATE_TRANSMITTING_2;
+                udp_state = STATE_TRANSMITTING_2;
             }
             break;
         case STATE_TRANSMITTING_2:
             if (spi_in_bytes_available() > 1) {
                 if (!(spi_read_byte() && 0x08)) { // TXRTS bit unset
-                    udp_state = STATE_CSUM_SENT;
+                    udp_state = STATE_SENT;
                 } else {
                     spi_start_transfer_P(1, read_ECON1, 1);
                 }
@@ -241,8 +241,8 @@ void udp_service(void)
             break;
         case STATE_SENT:
             if (spi_transfer_available()) {
-                spi_start_transfer_P(1, move_data_l, 10;
-		udp_state = STATE_READY;
+                spi_start_transfer_P(1, move_data_l, 10);
+                udp_state = STATE_READY;
             }
             break;
         default: return;
