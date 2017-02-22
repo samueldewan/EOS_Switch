@@ -28,12 +28,6 @@ extern int udp_eeprom_send(uint16_t buffer, uint8_t length);
 extern int udp_buffer_send(const uint8_t *buffer, uint8_t length);
 
 /**
- * Return whether the UDP system is ready to send a new packet. This can also be
- * used to check if the most recent sent packet has been transmitted.
- */
-extern int udp_ready(void);
-
-/**
  * Actions to be performed in the main loop.
  */
 extern void udp_service(void);

@@ -292,7 +292,6 @@ static void main_loop ()
 //    }
     
     // Network
-    enc28j60_service();
     udp_service();
     
     if (enc28j60_ready()) {
