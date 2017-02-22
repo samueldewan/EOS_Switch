@@ -11,6 +11,8 @@
 #include "udp.h"
 #include "spi.h"
 
+#include "pindefinitions.h"
+
 static uint16_t identification;
 
 static inline void udp_send_internal(uint8_t length);
@@ -154,10 +156,12 @@ void udp_service(void)
             res_low = spi_transfer(SPI_NOP);
             spi_end_cmd();
 
-            if (res & 0x02) { // DMAST bit set
+            if (res_low & 0x02) { // DMAST bit set
                 break;
             }
-
+            
+            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
+            
             /* Read checksum. */
             /* Read low byte (EDMACSL). */
             spi_start_cmd();

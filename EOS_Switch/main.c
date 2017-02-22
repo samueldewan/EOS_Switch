@@ -20,6 +20,7 @@ static inline void print_prompt(void);
 static inline void print_ipinfo(void);
 static inline void print_targetinfo(void);
 static inline void print_payloads(void);
+static inline void handle_testnet (int16_t offset);
 static inline void print_dhcp(void);
 static inline void process_set(char* property);
 
@@ -37,7 +38,7 @@ struct trigger_data {
     uint8_t t_two_state: 1;
 } trigger_flags;
 
-enum {NONE, PAYLOAD, SET} menu_status;
+enum {NONE, PAYLOAD, SET, TESTNET} menu_status;
 uint32_t menu_state;
 static char menu_buffer[200];
 
@@ -143,8 +144,10 @@ int main(void)
     sei();
     
     flags |= (1<<FLAG_STAT_ONE_ON);
+    stat_one_period = 500;
     
     init_enc28j60();
+    flags |= (1<<FLAG_ONLINE);
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
 //    uint8_t mac[] = {0xDD, 0x66, 0x0C, 0x0A, 0x2A, 0x79};
@@ -181,9 +184,10 @@ static const char menu_cmd_clear[] PROGMEM =        "clear";
 static const char menu_cmd_ipinfo[] PROGMEM =       "ipinfo";
 static const char menu_cmd_targetinfo[] PROGMEM =   "targetinfo";
 static const char menu_cmd_dhcp[] PROGMEM =         "dhcp";
-static const char menu_cmd_payoad[] PROGMEM =       "payload";
+static const char menu_cmd_payload[] PROGMEM =      "payload";
 static const char menu_cmd_set[] PROGMEM =          "set";
 static const char menu_cmd_testnet[] PROGMEM =      "testnet";
+static const char menu_cmd_testspi[] PROGMEM =      "testspi";
 
 static void main_loop ()
 {
@@ -194,8 +198,12 @@ static void main_loop ()
         
         if (trigger_flags.t_one_state && !(TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
             // was off, now on - Rising Edge
+            udp_eeprom_send(SETTING_T_ONE_RISE, 200);
+            stat_one_period = 100;
         } else if (!trigger_flags.t_one_state && (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
             // was on, now off - Falling Edge
+            udp_eeprom_send(SETTING_T_ONE_FALL, 200);
+            stat_one_period = 500;
         }
         
         trigger_flags.t_one_state = (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM));
@@ -207,8 +215,12 @@ static void main_loop ()
         
         if (trigger_flags.t_two_state && !(TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
             // was off, now on - Rising Edge
+            udp_eeprom_send(SETTING_T_TWO_RISE, 200);
+            stat_one_period = 100;
         } else if (!trigger_flags.t_two_state && (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
             // was on, now off - Falling Edge
+            udp_eeprom_send(SETTING_T_TWO_FALL, 200);
+            stat_one_period = 500;
         }
         
         trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
@@ -240,17 +252,23 @@ static void main_loop ()
                     print_targetinfo();
                 } else if (!strncasecmp_P(menu_buffer, menu_cmd_dhcp, 4)) {
                     print_dhcp();
-                }else if (!strncasecmp_P(menu_buffer, menu_cmd_payoad, 7)) {
+                }else if (!strncasecmp_P(menu_buffer, menu_cmd_payload, 7)) {
                     menu_status = PAYLOAD;
                     print_payloads();
                 } else if (!strncasecmp_P(menu_buffer, menu_cmd_set, 3)) {
                     menu_status = SET;
                     process_set(menu_buffer + 3);
-                } else if (!strncasecmp_P(menu_buffer, menu_cmd_testnet, 3)) {
-                    while (!udp_ready()) {
-                        // TODO: Remove busy-waiting
-                    }
-                    udp_buffer_send((uint8_t*)(menu_buffer + 8), strlen(menu_buffer) - 8);
+                } else if (!strncasecmp_P(menu_buffer, menu_cmd_testnet, 7)) {
+                    handle_testnet(8);
+                } else if (!strncasecmp_P(menu_buffer, menu_cmd_testspi, 7)) {
+                    spi_start_cmd();
+                    spi_transfer(strtol(menu_buffer + 8, NULL, 16));
+                    uint8_t val = spi_transfer(SPI_NOP);
+                    spi_end_cmd();
+                    char tmp[5];
+                    itoa(val, tmp, 16);
+                    serial_put_string(tmp);
+                    serial_put_byte('\n');
                 } else if (menu_buffer[0] == '\0') {
                     ;
                 } else {
@@ -275,51 +293,33 @@ static void main_loop ()
         case SET:
             process_set(NULL);
             break;
+        case TESTNET:
+            handle_testnet(-1);
+            break;
     }
 
     // STAT_ONE
-//    if (flags & (1<<FLAG_STAT_ONE_ON)) {
-//        if (stat_one_period != 0) {
-//            if ((millis - last_stat_one_time) > stat_one_period) {
-//                last_stat_one_time = millis;
-//                STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
-//            }
-//        } else {
-//            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
-//        }
-//    } else {
-//        STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
-//    }
+    if (flags & (1<<FLAG_STAT_ONE_ON)) {
+        if (stat_one_period != 0) {
+            if ((millis - last_stat_one_time) > stat_one_period) {
+                last_stat_one_time = millis;
+                STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
+            }
+        } else {
+            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
+        }
+    } else {
+        STAT_ONE_PORT &= ~(1<<STAT_ONE_NUM);
+    }
     
     // Network
     udp_service();
-    
-    if (enc28j60_ready()) {
-        stat_one_period = 500;
-        flags |= (1<<FLAG_ONLINE);
-    }
 }
 
 static inline void print_prompt(void) {
     if (flags & (1<<FLAG_ONLINE)) {
         serial_put_string_P(prompt_string);
     } else {
-        char temp[10];
-        itoa(enc28j60_state, temp, 10);
-        serial_put_string(temp);
-        serial_put_byte(debug);
-        
-        itoa(out_buffer_insert_p, temp, 10);
-        serial_put_string(temp);
-        serial_put_byte(' ');
-        itoa(out_buffer_withdraw_p, temp, 10);
-        serial_put_string(temp);
-        serial_put_byte(' ');
-        
-        itoa(debug_num, temp, 10);
-        serial_put_string(temp);
-        serial_put_byte(' ');
-        
         serial_put_byte(' ');
         serial_put_string_P(prompt_string_offline);
     }
@@ -436,6 +436,16 @@ static inline void print_payloads(void)
             menu_status = NONE;
             print_prompt();
             break;
+    }
+}
+
+static inline void handle_testnet (int16_t offset) {
+    if (offset != -1) {
+        menu_state = offset;
+    }
+    
+    if (!udp_buffer_send((uint8_t*)(menu_buffer + offset), strlen(menu_buffer) - offset)) {
+        menu_status = NONE;
     }
 }
 
