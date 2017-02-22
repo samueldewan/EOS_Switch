@@ -7,6 +7,7 @@
 #include "global.h"
 #include "pindefinitions.h"
 #include "serial.h"
+#include "network/spi.h"
 #include "network/enc28j60.h"
 #include "network/udp.h"
 
@@ -27,7 +28,7 @@ volatile uint32_t millis;
 volatile uint8_t flags;
 
 static uint32_t last_stat_one_time;
-static uint16_t stat_one_period;
+uint16_t stat_one_period;
 
 struct trigger_data {
     uint8_t t_one_dirty: 1;
@@ -136,6 +137,7 @@ int main(void)
 	initIO();
     init_timers();
     init_serial();
+    init_spi();
     flags |= (1<<FLAG_SERIAL_LOOPBACK);             // Enable serial loopback
 
     sei();
@@ -213,6 +215,7 @@ static void main_loop ()
     }
     
     serial_service();
+    spi_service();
     
     // Menu
     switch (menu_status) {
@@ -248,6 +251,8 @@ static void main_loop ()
                         // TODO: Remove busy-waiting
                     }
                     udp_buffer_send((uint8_t*)(menu_buffer + 8), strlen(menu_buffer) - 8);
+                } else if (menu_buffer[0] == '\0') {
+                    ;
                 } else {
                     serial_put_string_P(menu_unkown_cmd_prt1);
                     serial_put_byte('"');
@@ -273,18 +278,18 @@ static void main_loop ()
     }
 
     // STAT_ONE
-    if (flags & (1<<FLAG_STAT_ONE_ON)) {
-        if (stat_one_period != 0) {
-            if ((millis - last_stat_one_time) > stat_one_period) {
-                last_stat_one_time = millis;
-                STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
-            }
-        } else {
-            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
-        }
-    } else {
-        STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
-    }
+//    if (flags & (1<<FLAG_STAT_ONE_ON)) {
+//        if (stat_one_period != 0) {
+//            if ((millis - last_stat_one_time) > stat_one_period) {
+//                last_stat_one_time = millis;
+//                STAT_ONE_PORT ^= (1<<STAT_ONE_NUM);
+//            }
+//        } else {
+//            STAT_ONE_PORT |= (1<<STAT_ONE_NUM);
+//        }
+//    } else {
+//        STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
+//    }
     
     // Network
     enc28j60_service();
@@ -300,6 +305,23 @@ static inline void print_prompt(void) {
     if (flags & (1<<FLAG_ONLINE)) {
         serial_put_string_P(prompt_string);
     } else {
+        char temp[10];
+        itoa(enc28j60_state, temp, 10);
+        serial_put_string(temp);
+        serial_put_byte(debug);
+        
+        itoa(out_buffer_insert_p, temp, 10);
+        serial_put_string(temp);
+        serial_put_byte(' ');
+        itoa(out_buffer_withdraw_p, temp, 10);
+        serial_put_string(temp);
+        serial_put_byte(' ');
+        
+        itoa(debug_num, temp, 10);
+        serial_put_string(temp);
+        serial_put_byte(' ');
+        
+        serial_put_byte(' ');
         serial_put_string_P(prompt_string_offline);
     }
 }

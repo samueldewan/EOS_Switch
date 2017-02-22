@@ -192,7 +192,7 @@ void serial_service (void)
 {
     // If serial transmition is not locked (IE. a transmition is not already in progress concurently via the TX ISR) and there
     // are avaliable bytes, write a byte to the serial port and lock transmition. This will start transmition of all avaliable
-    // byte concurently via the ISR.
+    // bytes concurently via the ISR.
     if ((!(flags & (1<<FLAG_SERIAL_TX_LOCK))) && (out_buffer_withdraw_p != out_buffer_insert_p)) {
         flags |= (1<<FLAG_SERIAL_TX_LOCK);
         UDR0 = serial_out_buffer[out_buffer_withdraw_p];

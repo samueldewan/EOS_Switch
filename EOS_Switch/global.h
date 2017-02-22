@@ -41,4 +41,6 @@ extern volatile uint32_t millis;        // Tracks the number of milliseconds ela
 
 extern volatile uint8_t flags;          // Stores some global boolean flags
 
+extern uint16_t stat_one_period;
+
 #endif /* global_h */
