@@ -43,6 +43,16 @@ extern uint8_t spi_transfer_P (const uint8_t *byte_out);
 extern uint8_t spi_transfer_from_eeprom (uint16_t address);
 
 /**
+ *  Lower the SS (chip select) line
+ */
+extern void spi_start_cmd (void);
+
+/**
+ *  raise the SS (chip select) line
+ */
+extern void spi_end_cmd (void);
+
+/**
  *  Service to be run in each main loop
  */
 extern void spi_service (void);

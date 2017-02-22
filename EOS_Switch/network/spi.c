@@ -56,6 +56,16 @@ uint8_t spi_transfer_from_eeprom (uint16_t address)
     return SPDR;
 }
 
+void spi_start_cmd (void)
+{
+    SPI_PORT &= !(1<<SPI_SS_NUM);
+}
+
+void spi_end_cmd (void)
+{
+    SPI_PORT |= (1<<SPI_SS_NUM);
+}
+
 void spi_service (void)
 {
     
