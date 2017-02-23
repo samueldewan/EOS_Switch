@@ -13,6 +13,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+#include <string.h>
 
 #include "./libethernet/libethernet.h"
 
@@ -40,7 +41,9 @@ int init_network (void)
         }
     } else {
         ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
-        ethernet_wait_for_link_status(0);
+        if (!ethernet_wait_for_link_status(1000)) {
+            return -1;
+        }
     }
 #else
     ethernet_initialise(eeprom_read_dword(SETTING_IP_ADDR), eeprom_read_dword(SETTING_NETMASK), eeprom_read_dword(SETTING_ROUTER_ADDR));
@@ -77,9 +80,23 @@ int init_network (void)
 #	endif //IMPLEMENT_DHCP
 #endif //IMPLEMENT_DNS
     
-    //eos_connection = udp_connect(eeprom_read_dword(SETTING_TARGET_IP), eeprom_read_dword(SETTING_TARGET_PORT), 5, NULL);
+    eos_connection = udp_connect(eeprom_read_dword(SETTING_TARGET_IP), eeprom_read_dword(SETTING_TARGET_PORT), 5, NULL);
     
     return 0;
+}
+
+int network_send_packet (char *source, int length)
+{
+    uint8_t* buffer;
+    size_t buffer_size;
+    udp_start_packet(eos_connection, &buffer, &buffer_size);
+    length = (length < buffer_size) ? length : buffer_size;
+    
+    memcpy(buffer, source, length);
+    
+    udp_send(length);
+    
+    return length;
 }
 
 int network_send_from_eeprom (uint16_t address, int length)
@@ -89,7 +106,7 @@ int network_send_from_eeprom (uint16_t address, int length)
     udp_start_packet(eos_connection, &buffer, &buffer_size);
     length = (length < buffer_size) ? length : buffer_size;
     
-    eeprom_read_block(address, buffer, length);
+    eeprom_read_block(buffer, address, length);
     
     udp_send(length);
     

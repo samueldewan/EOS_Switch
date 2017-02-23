@@ -24,13 +24,15 @@ extern int init_network (void);
  */
 extern void reinit_network (void);
 
+extern int network_send_packet (char *source, int length);
+
 /**
  *  Sends a packet to the console
  *  @param address The address of the data in EEPROM
  *  @param length The length of the data buffer
  *  @return The number of bytes which where sent
  */
-int network_send_from_eeprom (uint16_t address, int length);
+extern int network_send_from_eeprom (uint16_t address, int length);
 
 /**
  * Gets the current IP address

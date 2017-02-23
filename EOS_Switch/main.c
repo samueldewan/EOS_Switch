@@ -11,12 +11,16 @@
 
 #include "libethernet/libethernet.h"
 
+// ION: 10.101.90.102   00-16-76-3d-25-18   gateway:10.101.90.102
+
 //MARK: Constants
+#define TRIGGER_DEBOUNCE_TIME 5
 
 // MARK: Function prototypes
 static void main_loop(void);
 
 static inline void print_prompt(void);
+static inline void handle_trigstat(uint8_t num);
 static inline void print_ipinfo(void);
 static inline void print_targetinfo(void);
 static inline void print_payloads(void);
@@ -31,10 +35,10 @@ static uint32_t last_stat_one_time;
 static uint16_t stat_one_period;
 
 struct trigger_data {
-    uint8_t t_one_dirty: 1;
-    uint8_t t_two_dirty: 1;
     uint8_t t_one_state: 1;
     uint8_t t_two_state: 1;
+    uint32_t t_one_shift;
+    uint32_t t_two_shift;
 } trigger_flags;
 
 enum {NONE, PAYLOAD, SET} menu_status;
@@ -102,8 +106,8 @@ void initIO(void)
     STAT_ONE_DDR |= (1<<STAT_ONE_NUM);
     STAT_TWO_DDR |= (1<<STAT_TWO_NUM);
     
-    EICRA |= (1<<ISC10)|(1<<ISC00);                 // Trigger interupts on an logical
-    EIMSK |= (1<<0)|(1<<1);                         // Enable interupts zero and one
+    //EICRA |= (1<<ISC10)|(1<<ISC00);                 // Trigger interupts on any logical change
+    //EIMSK |= (1<<0)|(1<<1);                         // Enable interupts zero and one
 }
 
 void init_timers(void)
@@ -144,7 +148,9 @@ int main(void)
     stat_one_period = 500;
     flags |= (1<<FLAG_STAT_ONE_ON);
     
-    //init_network();
+    if (!init_network()) {
+        flags |= (1<<FLAG_ONLINE);
+    }
     
 //    eeprom_update_block("EOS-Switch", SETTING_HOSTNAME, 11);
 //    uint8_t mac[] = {55, 2, 3, 4, 5, 6};
@@ -164,8 +170,13 @@ int main(void)
 //    eeprom_update_block("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non ante in urna fringilla sodales sit amet non est. Sed eu eros sagittis, pharetra tortor ac, dapibus ex. Ut lacinia ex sed nullam.", SETTING_T_TWO_RISE, 200);
 //    eeprom_update_block("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut volutpat erat sem. Donec nec magna mauris. Praesent rhoncus pharetra pellentesque. Integer a faucibus odio. In hac habitasse platea nullam.", SETTING_T_TWO_FALL, 200);
     
-    trigger_flags.t_one_state = (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM));
-    trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
+//    eeprom_update_byte(SETTING_T_ONE_RISE_LEN, 12);
+//    eeprom_update_byte(SETTING_T_ONE_FALL_LEN, 12);
+//    eeprom_update_byte(SETTING_T_TWO_RISE_LEN, 11);
+//    eeprom_update_byte(SETTING_T_TWO_FALL_LEN, 9);
+    
+    trigger_flags.t_one_state = !!(TRIGGER_ONE_PIN & (1<<TRIGGER_ONE_NUM));
+    trigger_flags.t_two_state = !!(TRIGGER_TWO_PIN & (1<<TRIGGER_TWO_NUM));
     
     serial_put_string_P(welcome_string);
     print_prompt();
@@ -176,41 +187,60 @@ int main(void)
 	return 0; // never reached
 }
 
-static const char menu_cmd_help[] PROGMEM =        "help";
-static const char menu_cmd_clear[] PROGMEM =       "clear";
-static const char menu_cmd_ipinfo[] PROGMEM =      "ipinfo";
-static const char menu_cmd_targetinfo[] PROGMEM =  "targetinfo";
-static const char menu_cmd_dhcp[] PROGMEM =        "dhcp";
-static const char menu_cmd_payoad[] PROGMEM =      "payload";
-static const char menu_cmd_set[] PROGMEM =         "set";
+static const char menu_cmd_help[] PROGMEM =         "help";
+static const char menu_cmd_clear[] PROGMEM =        "clear";
+static const char menu_cmd_ipinfo[] PROGMEM =       "ipinfo";
+static const char menu_cmd_targetinfo[] PROGMEM =   "targetinfo";
+static const char menu_cmd_dhcp[] PROGMEM =         "dhcp";
+static const char menu_cmd_payoad[] PROGMEM =       "payload";
+static const char menu_cmd_set[] PROGMEM =          "set";
+static const char menu_cmd_testnet[] PROGMEM =      "testnet";
+static const char menu_cmd_trigstat[] PROGMEM =    "trigstat";
+
 
 static void main_loop ()
 {
-    
     // Trigger One
-    if (trigger_flags.t_one_dirty) {
-        trigger_flags.t_one_dirty  = 0;
-        
-        if (trigger_flags.t_one_state && !(TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
-            // was off, now on - Rising Edge
-        } else if (!trigger_flags.t_one_state && (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM))) {
-            // was on, now off - Falling Edge
-        }
-        
-        trigger_flags.t_one_state = (TRIGGER_ONE_PORT & (1<<TRIGGER_ONE_NUM));
-    }
+    trigger_flags.t_one_shift = (trigger_flags.t_one_shift << 1);
+    trigger_flags.t_one_shift |= !!(TRIGGER_ONE_PIN & (1<<TRIGGER_ONE_NUM));
     
-    // Trigger Two
-    if (trigger_flags.t_two_dirty) {
-        trigger_flags.t_two_dirty  = 0;
+    //   Current state                          Prev. state
+    if ((trigger_flags.t_one_shift == 0x00) && (trigger_flags.t_one_state == 1)) {
+        // Was off, now on - Rising edge
+        stat_one_period = 100;
+        trigger_flags.t_one_state = 0;
+        if (flags & (1<<FLAG_ONLINE)) {
+            network_send_from_eeprom(SETTING_T_ONE_RISE, eeprom_read_byte(SETTING_T_ONE_RISE_LEN));
+        }
+    } else if ((trigger_flags.t_one_shift == 0xFFFFFFFF) && (trigger_flags.t_one_state == 0)) {
+        // Was on, now off - Falling edge
+        stat_one_period = 500;
+        trigger_flags.t_one_state = 1;
+        if (flags & (1<<FLAG_ONLINE)) {
+            network_send_from_eeprom(SETTING_T_ONE_FALL, eeprom_read_byte(SETTING_T_ONE_FALL_LEN));
+        }
+
+    }
         
-        if (trigger_flags.t_two_state && !(TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
-            // was off, now on - Rising Edge
-        } else if (!trigger_flags.t_two_state && (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM))) {
-            // was on, now off - Falling Edge
+    // Trigger Two
+    trigger_flags.t_two_shift = (trigger_flags.t_two_shift << 1);
+    trigger_flags.t_two_shift |= !!(TRIGGER_TWO_PIN & (1<<TRIGGER_TWO_NUM));
+
+    if ((trigger_flags.t_two_shift == 0x00) && (trigger_flags.t_two_state == 1)) {
+        // Was off, now on - Rising edge
+        stat_one_period = 100;
+        trigger_flags.t_two_state = 0;
+        if (flags & (1<<FLAG_ONLINE)) {
+            network_send_from_eeprom(SETTING_T_TWO_RISE, eeprom_read_byte(SETTING_T_TWO_RISE_LEN));
+        }
+    } else if ((trigger_flags.t_two_shift == 0xFFFFFFFF) && (trigger_flags.t_two_state == 0)) {
+        // Was on, now off - Falling edge
+        stat_one_period = 500;
+        trigger_flags.t_two_state = 1;
+        if (flags & (1<<FLAG_ONLINE)) {
+            network_send_from_eeprom(SETTING_T_TWO_FALL, eeprom_read_byte(SETTING_T_TWO_FALL_LEN));
         }
         
-        trigger_flags.t_two_state = (TRIGGER_TWO_PORT & (1<<TRIGGER_TWO_NUM));
     }
     
     serial_service();
@@ -243,7 +273,13 @@ static void main_loop ()
                     print_payloads();
                 } else if (!strncasecmp_P(menu_buffer, menu_cmd_set, 3)) {
                     menu_status = SET;
-                    process_set(/*strtok(str, " ")*/menu_buffer + 3);
+                    process_set(menu_buffer + 3);
+                } else if (!strncasecmp_P(menu_buffer, menu_cmd_testnet, 7)) {
+                    network_send_packet(menu_buffer + 8, strlen(menu_buffer) - 8);
+                } else if (!strncasecmp_P(menu_buffer, menu_cmd_trigstat, 8)) {
+                    handle_trigstat(strtol(menu_buffer + 9, NULL, 10));
+                } else if (menu_buffer[0] == '\0') {
+                    ;
                 } else {
                     serial_put_string_P(menu_unkown_cmd_prt1);
                     serial_put_byte('"');
@@ -282,9 +318,9 @@ static void main_loop ()
         STAT_ONE_PORT &= !(1<<STAT_ONE_NUM);
     }
     
-//    if (flags &= (1<<FLAG_ONLINE)) {
-//        network_service();
-//    }
+    if (flags & (1<<FLAG_ONLINE)) {
+        network_service();
+    }
 }
 
 static inline void print_prompt(void) {
@@ -369,6 +405,40 @@ static inline void print_targetinfo(void)
     serial_put_string_P(menu_targetinfo_port_string);
     utoa(eeprom_read_word(SETTING_TARGET_PORT), tmp, 10);
     serial_put_string(tmp);
+    serial_put_byte('\n');
+}
+
+static const char trigstat_trigger_string[] PROGMEM = "Trigger: ";
+static const char trigstat_shift_string[] PROGMEM =   "\tShift: ";
+static const char trigstat_state_string[] PROGMEM =   "\tState: ";
+
+static inline void handle_trigstat(uint8_t num)
+{
+    char tmp[33];
+    
+    serial_put_string_P(trigstat_trigger_string);
+    utoa(num, tmp, 10);
+    serial_put_string(tmp);
+    serial_put_byte('\n');
+    
+    serial_put_string_P(trigstat_shift_string);
+    if (num == 1) {
+        utoa(trigger_flags.t_one_shift, tmp, 2);
+        serial_put_string(tmp);
+    } else if (num == 2) {
+        utoa(trigger_flags.t_two_shift, tmp, 2);
+        serial_put_string(tmp);
+    }
+    serial_put_byte('\n');
+    
+    serial_put_string_P(trigstat_state_string);
+    if (num == 1) {
+        utoa(trigger_flags.t_one_state, tmp, 2);
+        serial_put_string(tmp);
+    } else if (num == 2) {
+        utoa(trigger_flags.t_two_state, tmp, 2);
+        serial_put_string(tmp);
+    }
     serial_put_byte('\n');
 }
 
@@ -541,6 +611,22 @@ static inline void parse_value(char* str, uint16_t address, uint8_t length) {
             break;
         default:
             eeprom_update_block(str, address, strlen(str) + 1);
+            switch (address) {
+                case SETTING_T_ONE_RISE:
+                    eeprom_update_byte(SETTING_T_ONE_RISE_LEN, strlen(str));
+                    break;
+                case SETTING_T_ONE_FALL:
+                    eeprom_update_byte(SETTING_T_ONE_FALL_LEN, strlen(str));
+                    break;
+                case SETTING_T_TWO_RISE:
+                    eeprom_update_byte(SETTING_T_TWO_RISE_LEN, strlen(str));
+                    break;
+                case SETTING_T_TWO_FALL:
+                    eeprom_update_byte(SETTING_T_TWO_FALL_LEN, strlen(str));
+                    break;
+                default:
+                    break;
+            }
             // string
             break;
     }
@@ -603,14 +689,14 @@ ISR (TIMER0_COMPA_vect)                             // Timer 0, called every mil
     }
 }
 
-ISR (INT0_vect)
-{
-    trigger_flags.t_one_dirty = 1;
-}
-
-ISR (INT1_vect)
-{
-    trigger_flags.t_two_dirty = 1;
-}
+//ISR (INT0_vect)
+//{
+//    trigger_flags.t_one_dirty = 1;
+//}
+//
+//ISR (INT1_vect)
+//{
+//    trigger_flags.t_two_dirty = 1;
+//}
 
 

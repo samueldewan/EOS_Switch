@@ -31,6 +31,11 @@
 #define SETTING_TARGET_IP       75      // 4 bytes
 #define SETTING_TARGET_PORT     79      // 2 bytes
 
+#define SETTING_T_ONE_RISE_LEN  100     // 1 byte
+#define SETTING_T_ONE_FALL_LEN  101     // 1 byte
+#define SETTING_T_TWO_RISE_LEN  102     // 1 byte
+#define SETTING_T_TWO_FALL_LEN  103     // 1 byte
+
 #define SETTING_T_ONE_RISE      224     // 200 bytes
 #define SETTING_T_ONE_FALL      424     // 200 bytes
 #define SETTING_T_TWO_RISE      624     // 200 bytes
