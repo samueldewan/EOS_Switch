@@ -11,7 +11,7 @@
 
 #include "libethernet/libethernet.h"
 
-// ION: 10.101.90.102   00-16-76-3d-25-18   gateway:10.101.90.102 
+// ION: 10.101.90.102   00-16-76-3d-25-18   gateway:10.101.90.102
 
 //MARK: Constants
 #define TRIGGER_DEBOUNCE_TIME 5
